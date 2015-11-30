@@ -1,0 +1,520 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- ====================================================================== 
+	<Project Date>
+	
+	<Project Name>
+
+	Author:	                   
+	    <Author>
+     ====================================================================== -->
+
+<project name="MaximoTemplate" default="build" xmlns:ivy="antlib:org.apache.ivy.ant" basedir=".">
+
+	<!-- ================================= 
+          Project package information              
+         ================================= -->
+	<property name="package.name" value="maximotemplate"/>
+
+	<!-- ================================= 
+          Ivy configuration properties        
+         ================================= -->
+	<!-- Change this property to use a newer version of Ivy -->
+	<property name="ivy.install.version" value="2.2.0"/>
+	<property name="ivy.jar.dir" value="${basedir}/lib"/>
+	<property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar"/>
+
+	<!-- ================================= 
+          Standard project properties file     
+         ================================= -->
+	<property name="lib.dir" value="${basedir}/lib"/>
+	<property file="${basedir}/build.properties"/>
+
+
+
+	<!-- ================================= 
+          Classpath configuration 
+         ================================= -->
+	<!-- Application classpath -->
+	<path id="app.classpath">
+		<pathelement location="${src.dir}"/>
+		<fileset dir="${lib.dir}">
+			<include name="*.jar"/>
+		</fileset>
+	</path>
+
+	<!-- Ivy library classpath -->
+	<path id="lib.build.classpath">
+		<fileset dir="lib">
+			<include name="build/*.jar"/>
+		</fileset>
+	</path>
+
+	<path id="lib.test.classpath">
+		<fileset dir="lib">
+			<include name="test/*.jar"/>
+		</fileset>
+	</path>
+
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="app.classpath"/>
+
+	<!-- ================================= 
+          target: Main build target, builds and packages the application.
+         ================================= -->
+	<target name="build" depends="scrub,package" description="Resolves dependencies, compiles, and packages the application.">
+	</target>
+
+	<!-- ================================= 
+          target: Initialize the build and perform dependency checks.              
+         ================================= -->
+	<target name="init" depends="init.properties,ivy.resolve" description="Initialize build environment.">
+		<mkdir dir="${build.dir}"/>
+		<mkdir dir="${build.dir}/main"/>
+		<mkdir dir="${build.dir}/tests"/>
+		<mkdir dir="${build.dir}/javadoc"/>
+		<mkdir dir="${ivy.distrib.dir}/jars"/>
+		<mkdir dir="${ivy.distrib.dir}/zips"/>
+	</target>
+
+	<target name="scrub" depends="init.properties,ivy.configure" description="Clean build folder and other build artifacts, except for dependent jar files.">
+		<delete dir="${ivy.distrib.dir}"/>
+
+		<!-- delete the build directory -->
+		<delete dir="${build.dir}"/>
+	</target>
+
+	<!-- ================================= 
+          target: app.clean              
+         ================================= -->
+	<target name="clean" depends="scrub,clean.lib" description="Clean build folder and other build artifacts" unless="clean.has.run">
+		<property name="clean.has.run" value="true"/>
+	</target>
+
+        
+	<target name="test" depends="test.compile" description="Run JUnit tests">
+        <if>
+            <isset property="maximo.home"/>
+            <then>
+                <path id="test.classpath">
+                     <pathelement location="${build.dir}/tests"/>
+                     <pathelement location="${build.dir}/main"/>
+                     <pathelement location="${maximo.home}/applications/"/>
+                     <pathelement location="${maximo.home}/applications/maximo/businessobjects/classes/"/>
+                     <pathelement location="${maximo.home}/applications/maximo/properties/"/>
+                     <fileset dir="${maximo.home}/applications/maximo/lib/">
+                         <include name="*.jar"/>
+                         <exclude name="ant.jar"/>
+                     </fileset>
+                 </path>
+            </then>
+            <else>
+                <path id="test.classpath">
+                     <pathelement location="${build.dir}/tests"/>
+                     <pathelement location="${build.dir}/main"/>
+                     <pathelement location="${basedir}/properties"/>
+                 </path>
+            </else>
+        </if>
+            
+        <junit printsummary="false" haltonerror="false" haltonfailure="false" fork="yes" forkmode="once" maxmemory="900m">
+            <jvmarg value="-Dmxe.home=${maximo.home}/applications"/>
+            <jvmarg value="-XX:MaxPermSize=128m"/>
+            <formatter type="brief" usefile="false" />
+            <classpath>
+                <path refid="lib.test.classpath"/>
+                <path refid="app.classpath"/>
+                <path refid="test.classpath" />
+            </classpath>
+
+            <batchtest fork="yes" todir="${build.dir}">
+                <fileset dir="${test.dir}" includes="**/*Test.java"/>
+            </batchtest>
+        </junit>
+	</target>
+
+	<!-- Packages the files to JARs for deployment -->
+	<target name="package" depends="package.zip" description="Packages the project into a JAR and ZIP file for distribution">
+	</target>
+
+	<!-- publish the artifacts to the ivy repository -->
+	<target name="publish" depends="package,package.javadoc,package.source" description="Build and publish the artifact" unless="${ivy.disable}">
+		<ivy:publish resolver="${ivy.publish.resolver}" pubrevision="${revision}" overwrite="${ivy.publish.overwrite}"/>
+	</target>
+
+	<target name="javadoc" depends="init" description="Generate JavaDoc for this project">
+		<javadoc sourcepath="${src.dir}" destdir="${build.dir}/javadoc" access="protected" breakiterator="true">
+			<classpath refid="app.classpath"/>
+			<classpath refid="lib.build.classpath"/>
+			<link href="http://docs.oracle.com/javase/1.5.0/docs/api/"/>
+			<link href="http://docs.oracle.com/javaee/1.4/api/"/>
+		</javadoc>
+	</target>
+
+    <target name="launcher" depends="init" description="Create a JUnit Launcher appropriate for this project.">
+        <xmlproperty file=".project" prefix="eclipseprj" keepRoot="false" />
+
+        <pathconvert property="testlibs" targetos="unix" pathsep=" ">
+            <path>
+                <fileset dir="${lib.dir}">
+                    <include name="test/*.jar" />
+                    <exclude name="test/businessobjects.jar"/>
+                </fileset>
+            </path>
+            <chainedmapper>
+                <flattenmapper />
+                <regexpmapper from="(.*)" to="&lt;listEntry value=&quot;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot; standalone=&amp;quot;no&amp;quot;?&amp;gt;&amp;#13;&amp;#10;&amp;lt;runtimeClasspathEntry internalArchive=&amp;quot;/${eclipseprj.name}/lib/test/\1&amp;quot; path=&amp;quot;3&amp;quot; type=&amp;quot;2&amp;quot;/&amp;gt;&amp;#13;&amp;#10;&quot;/>" />
+            </chainedmapper>
+        </pathconvert>
+
+        <if>
+            <isset property="maximo.home"/>
+            <then>
+                <pathconvert property="launcher.maximo.libs" targetos="unix" pathsep=" ">
+                    <path>
+                        <fileset dir="${maximo.home}/applications/maximo/lib">
+                            <include name="*.jar" />
+                            <exclude name="ant.jar"/>
+                            <exclude name="slf4j-*.jar"/>
+                        </fileset>
+                    </path>
+                    <chainedmapper>
+                        <flattenmapper />
+                        <regexpmapper from="(.*)" to="&lt;listEntry value=&quot;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot; standalone=&amp;quot;no&amp;quot;?&amp;gt;&amp;#13;&amp;#10;&amp;lt;runtimeClasspathEntry internalArchive=&amp;quot;/${maximo.home}/applications/maximo/lib/\1&amp;quot; path=&amp;quot;3&amp;quot; type=&amp;quot;2&amp;quot;/&amp;gt;&amp;#13;&amp;#10;&quot;/>" />
+                    </chainedmapper>
+                </pathconvert>
+
+                <property name="launcher.maximo.home">
+                    <![CDATA[
+                    <listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#13;&#10;&lt;runtimeClasspathEntry externalArchive=&quot;${maximo.home}/applications/maximo/properties&quot; path=&quot;3&quot; type=&quot;2&quot;/&gt;&#13;&#10;"/>
+                    <listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#13;&#10;&lt;runtimeClasspathEntry externalArchive=&quot;${maximo.home}/applications/maximo/businessobjects/classes&quot; path=&quot;3&quot; type=&quot;2&quot;/&gt;&#13;&#10;"/>
+                    ]]>
+                </property>
+            </then>
+            <else>
+                <property name="launcher.maximo.libs" value=""/>
+                <property name="launcher.maximo.home" value=""/>
+            </else>
+        </if>
+
+        <copy file="RunAllTests.launch.template" tofile="RunAllTests.launch" overwrite="true">
+            <filterset>
+                <filter token="PROJECTNAME" value="${eclipseprj.name}" />
+                <filter token="TESTLIBS" value="${testlibs}${launcher.maximo.home}${launcher.maximo.libs}"/>
+            </filterset>
+        </copy>
+    </target>
+
+	<target name="deploy" depends="deploy.local" description="Deploy the zip file to a Maximo instance"/>
+
+	<target name="ftp" depends="init" description="FTP the created JAR files to the server.">
+		<ftp server="${ftp.server}" remotedir="ibm\WebSphere\AppServer\profiles\ctgAppSrv01\installedApps\ctgCell01\MAXIMO.ear\lib" userid="${ftp.user}" password="${ftp.password}" separator="\" verbose="yes" passive="true">
+			<fileset dir="${ivy.distrib.dir}/jars">
+				<include name="${package.name.mbo.jar}"/>
+			</fileset>
+		</ftp>
+
+		<ftp server="${ftp.server}" remotedir="IBM\SMP\maximo\applications\maximo\lib" userid="${ftp.user}" password="${ftp.password}" separator="\" verbose="yes" passive="true">
+			<fileset dir="${ivy.distrib.dir}/jars">
+				<include name="${package.name.mbo.jar}"/>
+			</fileset>
+		</ftp>
+
+		<ftp server="${ftp.server}" remotedir="ibm\WebSphere\AppServer\profiles\ctgAppSrv01\installedApps\ctgCell01\MAXIMO.ear\maximouiweb.war\WEB-INF\lib" userid="${ftp.user}" password="${ftp.password}" separator="\" verbose="yes" passive="true">
+			<fileset dir="${ivy.distrib.dir}/jars">
+				<include name="${package.name.ui.jar}"/>
+			</fileset>
+		</ftp>
+
+		<ftp server="${ftp.server}" remotedir="ibm\SMP\maximo\applications\maximo\maximouiweb\webmodule\WEB-INF\lib" userid="${ftp.user}" password="${ftp.password}" separator="\" verbose="yes" passive="true">
+			<fileset dir="${ivy.distrib.dir}/jars">
+				<include name="${package.name.ui.jar}"/>
+			</fileset>
+		</ftp>
+	</target>
+
+
+	<target name="scp" depends="init" description="SCP the created JAR filese to the server">
+		<scp trust="true" todir="${scp.user}:${scp.password}@${scp.server}:/opt/IBM/WebSphere/AppServer/profiles/ctgAppSrv01/installedApps/ctgCell01/MAXIMO.ear/lib">
+			<fileset dir="${ivy.distrib.dir}/jars">
+				<include name="${package.name.mbo.jar}"/>
+			</fileset>
+		</scp>
+		<scp trust="true" todir="${scp.user}:${scp.password}@${scp.server}:/opt/IBM/WebSphere/AppServer/profiles/ctgAppSrv01/installedApps/ctgCell01/MAXIMO.ear/maximouiweb.war/WEB-INF/lib">
+			<fileset dir="${ivy.distrib.dir}/jars">
+				<include name="${package.name.ui.jar}"/>
+			</fileset>
+		</scp>
+	</target>
+
+	<target name="fix.javadoc" description="Fix the javadoc references in .classpath to point to the current project">
+		<xmlproperty file=".project" prefix="eclipseprj" keepRoot="false" />
+		<replaceregexp file=".classpath"
+		               match="(&lt;attribute name=&quot;javadoc_location&quot; value=&quot;jar:platform:/resource/)[^/]*(/.*)"
+		               replace="\1${eclipseprj.name}\2"
+		               byline="true"
+		/>
+	</target>
+	
+	<!-- internal: initialize the property file -->
+	<target name="init.properties">
+		<if>
+			<available file="${basedir}/build.properties"/>
+			<then/>
+			<else>
+				<if>
+					<available file="${basedir}/build.properties.template"/>
+					<then>
+						<copy file="${basedir}/build.properties.template" tofile="${basedir}/build.properties"/>
+						<property file="${basedir}/build.properties"/>
+					</then>
+				</if>
+
+				<if>
+					<available file="${basedir}/build.properties"/>
+					<then/>
+					<else>
+						<fail message="The ${basedir}/build.properties file is missing, aborting build."/>
+					</else>
+				</if>
+			</else>
+		</if>
+		<property file="${basedir}/build.version.properties"/>
+		<property name="package.name.mbo.jar" value="${package.name}-${revision}.jar"/>
+		<property name="package.name.ui.jar" value="${package.name}-ui-${revision}.jar"/>
+		<property name="package.name.zip" value="${package.name}-${revision}.zip"/>
+		<property name="package.name.javadoc" value="${package.name}-javadoc-${revision}.zip"/>
+		<property name="package.name.source" value="${package.name}-source-${revision}.zip"/>
+	</target>
+
+	<!-- internal: initialize the http proxy -->
+	<target name="init.proxy" depends="init.properties">
+		<if>
+			<equals arg1="${use.proxy}" arg2="true"/>
+			<then>
+				<setproxy proxyhost="${proxy.host}" proxyport="${proxy.port}" proxyuser="${proxy.user}" proxypassword="${proxy.password}"/>
+			</then>
+		</if>
+	</target>
+
+	<!-- ================================= 
+          target: Attempts to download Ivy
+         ================================= -->
+	<target name="ivy.download" depends="init.proxy,ivy.download.check" unless="${skip.ivy.download}">
+		<mkdir dir="${ivy.jar.dir}"/>
+		<!-- download Ivy from web site so that it can be used even without any special installation -->
+		<get src="http://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar" dest="${ivy.jar.file}" usetimestamp="true"/>
+	</target>
+
+	<!-- ================================= 
+          target: Installs ivy for use by the build.
+         ================================= -->
+	<target name="ivy.install" depends="ivy.download">
+		<!-- try to load ivy here from local ivy dir, in case the user has not already dropped
+    	      it into ant's lib dir (note that the latter copy will always take precedence).
+    	      We will not fail as long as local lib dir exists (it may be empty) and
+    	      ivy is in at least one of ant's lib dir or the local lib dir. -->
+		<path id="ivy.lib.path">
+			<fileset dir="${ivy.jar.dir}" includes="*.jar"/>
+		</path>
+
+		<taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="app.classpath"/>
+	</target>
+
+	<target name="ivy.configure" depends="ivy.install">
+		<ivy:configure file="./ivyconfig.xml" override="true"/>
+	</target>
+
+	<target name="ivy.resolve" depends="ivy.configure,ivy.resolve.check" unless="${skip.ivy.resolve}">
+		<property name="ivy.has.resolved" value="true"/>
+		<ivy:retrieve pattern="${ivy.lib.dir}/[conf]/[artifact].[ext]" overwriteMode="newer"/>
+	</target>
+    
+	<target name="package.jar.mbo" depends="app.compile" unless="${skip.package.jar.mbo}">
+		<!-- Jar up everything  -->
+		<jar destfile="${ivy.distrib.dir}/jars/${package.name.mbo.jar}">
+			<manifest>
+				<!-- Information about the program itself -->
+				<attribute name="Implementation-Vendor" value="${manifest.impl.vendor}"/>
+				<attribute name="Implementation-Title" value="${manifest.impl.title} - Business Objects"/>
+				<attribute name="Implementation-Version" value="${revision}"/>
+
+				<attribute name="Specification-Vendor" value="${manifest.spec.vendor}"/>
+				<attribute name="Specification-Title" value="${manifest.spec.title} - Business Objects"/>
+				<attribute name="Specification-Version" value="${manifest.spec.version}"/>
+			</manifest>
+			<fileset dir="${build.dir}/main">
+				<exclude name="**/webclient/**"/>
+				<exclude name="**/*Test.class"/>
+				<exclude name="test/**"/>
+				<exclude name="**/test/**"/>
+			</fileset>
+			<fileset dir="${basedir}" includes="META-INF/interloc.xml"/>
+		</jar>
+	</target>
+
+	<target name="package.javadoc" depends="javadoc" unless="${skip.package.javadoc}">
+		<zip destfile="${ivy.distrib.dir}/zips/${package.name.javadoc}" basedir="${build.dir}/javadoc"/>
+	</target>
+
+	<target name="package.source" depends="init" unless="${skip.package.source}">
+		<zip destfile="${ivy.distrib.dir}/zips/${package.name.source}">
+			<fileset dir="${src.dir}">
+				<include name="**/*.java" />
+			</fileset>
+		</zip>
+	</target>
+
+	<target name="package.jar.webclient" depends="app.compile" unless="${skip.package.jar.webclient}">
+		<!-- Jar up everything  -->
+		<jar destfile="${ivy.distrib.dir}/jars/${package.name.ui.jar}">
+			<manifest>
+				<!-- Information about the program itself -->
+				<attribute name="Implementation-Vendor" value="${manifest.impl.vendor}"/>
+				<attribute name="Implementation-Title" value="${manifest.impl.title} - User Interface"/>
+				<attribute name="Implementation-Version" value="${revision}"/>
+
+				<attribute name="Specification-Vendor" value="${manifest.spec.vendor}"/>
+				<attribute name="Specification-Title" value="${manifest.spec.title} - User Interface"/>
+				<attribute name="Specification-Version" value="${manifest.spec.version}"/>
+			</manifest>
+			<fileset dir="${build.dir}/main">
+				<include name="**/webclient/**"/>
+				<exclude name="**/*Test.class"/>
+				<exclude name="test/**"/>
+				<exclude name="**/test/**"/>
+			</fileset>
+		</jar>
+	</target>
+
+	<target name="package.zip" depends="app.appxml,package.jar.mbo,package.jar.webclient" unless="${skip.package.zip}">
+		<zip destfile="${ivy.distrib.dir}/zips/${package.name.zip}">
+			<fileset dir="${build.dir}">
+				<include name="deployment/product/${package.name}.xml"/>
+			</fileset>
+			<!-- this will copy the jar files into the package. -->
+			<zipfileset dir="${ivy.distrib.dir}/jars" includes="${package.name.mbo.jar}" prefix="applications/maximo/lib/"/>
+			<zipfileset dir="${ivy.distrib.dir}/jars" includes="${package.name.ui.jar}" prefix="applications/maximo/maximouiweb/webmodule/WEB-INF/lib/"/>
+		</zip>
+
+		<if>
+			<available file="${lib.dir}/run" type="dir"/>
+			<then>
+				<zip destfile="${ivy.distrib.dir}/zips/${package.name.zip}" update="true">
+					<zipfileset dir="${lib.dir}/run" includes="*" prefix="applications/maximo/lib/"/>
+				</zip>
+			</then>
+		</if>
+		<if>
+			<available file="${lib.dir}/runui" type="dir"/>
+			<then>
+				<zip destfile="${ivy.distrib.dir}/zips/${package.name.zip}" update="true">
+					<zipfileset dir="${lib.dir}/runui" includes="*" prefix="applications/maximo/maximouiweb/webmodule/WEB-INF/lib/"/>
+				</zip>
+			</then>
+		</if>
+	</target>
+
+	<target name="deploy.local" depends="package.zip">
+		<unzip src="${ivy.distrib.dir}/zips/${package.name.zip}" dest="${maximo.home}" overwrite="true"/>
+	</target>
+
+	<target name="test.compile" depends="app.compile">
+		<!-- Compile the source files to the bin directory -->
+		<javac srcdir="${test.dir}" destdir="${build.dir}/tests" debug="true" includeantruntime="false">
+			<classpath>
+				<path refid="lib.test.classpath"/>
+				<path refid="lib.build.classpath"/>
+				<path refid="app.classpath"/>
+				<pathelement location="${build.dir}/main"/>
+			</classpath>
+		</javac>
+		<copy todir="${build.dir}/tests">
+			<fileset dir="${test.dir}">
+				<exclude name="**/*.java"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="app.appxml" depends="init">
+		<pathconvert property="testpath" targetos="unix" pathsep=" ">
+			<path>
+				<fileset dir="${lib.dir}">
+					<include name="run/*.jar"/>
+				</fileset>
+				<pathelement location="${package.name.mbo.jar}"/>
+			</path>
+			<chainedmapper>
+				<flattenmapper/>
+				<regexpmapper from="(.*)" to="lib/\1"/>
+			</chainedmapper>
+		</pathconvert>
+
+
+		<copy file="deployment/product/product.xml.template" tofile="${build.dir}/deployment/product/${package.name}.xml" overwrite="true">
+			<filterset>
+				<filter token="APPNAME" value="${package.name}"/>
+				<filter token="MBOJARFILE" value="${package.name.mbo.jar}"/>
+				<filter token="WEBJARFILE" value="${package.name.ui.jar}"/>
+				<filter token="RUNJARPATH" value="${testpath}"/>
+			</filterset>
+		</copy>
+	</target>
+
+	<!-- ================================= 
+          target: Compile application code to the build folder.              
+         ================================= -->
+	<target name="app.compile" depends="init,ivy.resolve">
+		<!-- Compile the source files to the bin directory -->
+		<javac srcdir="${src.dir}" destdir="${build.dir}/main" debug="${debug}" target="${java.target}" source="${java.source}" includeantruntime="false">
+			<classpath refid="app.classpath"/>
+			<classpath refid="lib.build.classpath"/>
+		</javac>
+		<copy todir="${build.dir}/main">
+			<fileset dir="${src.dir}">
+				<exclude name="**/*.java"/>
+			</fileset>
+		</copy>
+
+		<!-- Rmic exmaple should you have new remote stubs -->
+		<!--
+		<rmic base="${build.dir}/main" stubversion="1.2">
+			<classpath refid="app.classpath"/>
+			<classpath refid="lib.build.classpath"/>
+			
+			<include name="**/ClassName*.class"/>
+			<exclude name="**/*Remote.class"/>
+	    </rmic>
+		-->
+	</target>
+
+    <!-- clean up the lib directory unless ivy has been disabled -->
+    <target name="clean.lib" unless="${ivy.disable}">
+        <delete dir="${lib.dir}/ant"/>
+        <delete dir="${lib.dir}/build"/>
+        <delete dir="${lib.dir}/test"/>
+        <delete dir="${lib.dir}/run"/>
+        <delete dir="${lib.dir}/runui"/>
+        <delete dir="${lib.dir}/javadoc"/>
+        <delete dir="${lib.dir}/reference"/>
+        <delete dir="${lib.dir}/source"/>
+    </target>
+
+    <!-- determine if ivy.resolve should be executed or not -->
+    <target name="ivy.resolve.check">
+        <condition property="skip.ivy.resolve">
+            <or>
+                <istrue value="${ivy.has.resolved}"/>
+                <istrue value="${ivy.disable}"/>
+            </or>
+        </condition>
+    </target>
+
+    <target name="ivy.download.check">
+        <condition property="skip.ivy.download">
+            <or>
+                <istrue value="${ivy.skip.download}"/>
+                <istrue value="${ivy.disable}"/>
+            </or>
+        </condition>
+    </target>
+
+</project>

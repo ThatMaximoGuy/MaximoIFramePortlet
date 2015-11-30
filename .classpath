@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="tests"/>
+	<classpathentry kind="src" path="properties"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/test/activeio-core.jar"/>
+	<classpathentry kind="lib" path="lib/test/activemq-core.jar"/>
+	<classpathentry kind="lib" path="lib/test/jdom.jar"/>
+	<classpathentry kind="lib" path="lib/test/junit-addons.jar"/>
+	<classpathentry kind="lib" path="lib/test/junit.jar"/>
+	<classpathentry kind="lib" path="lib/test/log4j.jar"/>
+	<classpathentry kind="lib" path="lib/test/mockito-core.jar"/>
+	<classpathentry kind="lib" path="lib/test/mxjunit-core.jar"/>
+	<classpathentry kind="lib" path="lib/test/slf4j-api.jar"/>
+	<classpathentry kind="lib" path="lib/test/slf4j-nop.jar"/>
+	<classpathentry kind="lib" path="lib/test/geronimo-j2ee_1.4_spec.jar"/>
+	<classpathentry kind="lib" path="lib/test/mxjunit-provider-j2ee.jar"/>
+	<classpathentry kind="lib" path="lib/build/asset-management-webclient.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/MaximoTemplate/lib/reference/asset-management-javadoc.zip!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/build/asset-management.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/MaximoTemplate/lib/reference/asset-management-javadoc.zip!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

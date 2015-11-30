@@ -1,0 +1,62 @@
+#Standard and required paths
+bin.dir=${basedir}/bin
+src.dir=${basedir}/src
+test.dir=${basedir}/tests
+doc.dir=${basedir}/doc
+lib.dir=${basedir}/lib
+build.dir=${basedir}/build
+
+# path to local repository
+ivy.local.default.root=${user.home}/.localrepo
+
+# name of repository to which artifacts will be published.
+ivy.publish.resolver=local
+
+# whether publish should overwrite the existing version in the repository
+ivy.publish.overwrite=false
+
+# whether attempts should be made to download ivy
+ivy.skip.download=true
+
+# disable all of ivy
+ivy.disable=false
+
+# if debug information is compiled into class files.
+debug=true
+
+# set javac source and target parameters. 
+java.target=1.6
+java.source=1.6
+
+#Proxy settings if required
+use.proxy=false
+proxy.host=
+proxy.port=
+proxy.user=	
+proxy.password=
+
+# Home directory where Maximo is located.
+maximo.home=C:/ibm/SMP/maximo
+
+#FTP properties
+# for NT usernames you will need to use a double slash DOMAIN\\username
+ftp.user=maximo
+ftp.password=maximo
+ftp.server=192.168.32.128
+
+#SCP properties
+scp.user=root
+scp.password=interloc
+scp.server=192.168.1.147
+
+# Skip aspects of build process.
+# the format is skip.buildTarget.
+skip.package.jar.mbo=false
+skip.package.javadoc=false
+skip.package.source=false
+skip.package.jar.webclient=false
+skip.package.zip=false
+
+# username and password for Interloc repository
+repo.username.interloc=${user.name}
+repo.password.interloc=

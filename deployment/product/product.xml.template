@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!-- 
+	The @APPNAME@ product xml ensures that the @MBOJARFILE@ is 
+	included in the Maximo EAR build and is added to the 
+	buisnessobject.jar classpath.
+-->
+<product name="@APPNAME@">
+	<targetupdate>
+		<targetname>init</targetname>
+		<content>
+			<update>
+				<property name="maximo.businessobjectsclasspath"
+					value="@RUNJARPATH@" />
+			</update>
+		</content>
+	</targetupdate>
+</product>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ivy-module version="1.0">
+    <info organisation="com.interlocsolutions.maximo" module="${package.name}"/>
+    
+    <configurations>
+        <!-- build must compile both businessobject and webclient code, so extends both confs -->
+        <!-- test can only run businessobject code, so it only extends run conf -->           	
+        <conf name="run" visibility="public" description="jars used to run; end up in lib" />
+        <conf name="runui" visibility="public" description="jars used to run; end up in WEB-INF/lib" />
+        <conf name="javadoc" visibility="public" description="javadoc for project" />
+		<conf name="source" visibility="public" description="source for this project" />
+        <conf name="reference" visibility="private" description="javadoc for this project that should not get republished" />
+       	<conf name="build" extends="run,runui" visibility="private" description="jars needed to build" />       	
+     	<conf name="test"  extends="run" visibility="private" description="jars needed to run tests"/>
+     	<conf name="ant"   visibility="private" description="jars needed for ant and ant tasks"/>
+    </configurations>
+    
+    <publications>
+        <artifact name="${package.name}" type="zip" ext="zip"/>
+        <artifact name="${package.name}" type="jar" ext="jar" conf="run"/>
+        <artifact name="${package.name}-javadoc" type="zip" ext="zip" conf="javadoc"/>
+        <artifact name="${package.name}-source" type="zip" ext="zip" conf="source"/>
+    </publications>
+    
+    <dependencies>
+        <!-- Dependencies for compiling Maximo extensions. -->
+        <dependency org="com.ibm.maximo" name="asset-management" rev="7.6.0.0" conf="build,test->default" />
+        <dependency org="com.ibm.maximo" name="asset-management-webclient" rev="7.6.0.0" conf="build->default"/>
+        <dependency org="org.apache.geronimo.specs"  name="geronimo-j2ee_1.4_spec" rev="1.1" conf="build->default"/>
+                
+        <!-- Maximo javadoc is separate because there are more "flavours" of Maximo than "flavours" of the javadoc --> 
+        <dependency org="com.ibm.maximo" name="asset-management-javadoc" rev="7.6.0.0" conf="reference->javadoc" />
+        
+        <!-- Dependencies for JUnit testing -->
+        <dependency org="com.interlocsolutions.maximo" name="mxjunit-core" rev="1.5.0" conf="test->run; reference->javadoc; reference->source"/>
+        <dependency org="com.interlocsolutions.maximo" name="mxjunit-provider-j2ee" rev="1.0.2" conf="test->run; reference->javadoc"/>
+        <dependency org="com.interlocsolutions.maximo" name="MaximoRuntime" rev="7.6" conf="test->run"/>
+        
+        <!-- Dependencies for ant and build tasks -->
+        <dependency org="commons-net" name="commons-net" rev="3.0.1" conf="ant->default"/>
+        <dependency org="com.jcraft" name="jsch" rev="0.1.45" conf="ant->default"/>
+    </dependencies>
+</ivy-module>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ivysettings>
+	<settings defaultResolver="chain"/>
+    <credentials host="archiva.interlocsolutions.com" realm="Repository Archiva Managed internal Repository" username="${repo.username.interloc}" passwd="${repo.password.interloc}" />
+	<resolvers>
+        <filesystem name="local" m2compatible="false" local="true">
+	        <ivy pattern="${ivy.local.default.root}/[organization]/[module]/ivy-[revision].xml" />
+        	<artifact pattern="${ivy.local.default.root}/[organization]/[module]/[artifact]-[revision].[ext]" />        
+        </filesystem>
+        <filesystem name="project-local" m2compatible="false" local="true">
+        	<artifact pattern="${basedir}/repository/[organization]/[module]/[artifact]-[revision].[ext]" />        
+        </filesystem>
+
+        <url name="interloc-archiva" m2compatible="true">
+            <ivy      pattern="http://archiva.interlocsolutions.com/archiva/repository/internal/[organization]/[module]/[revision]/ivy-[revision].xml" />
+            <artifact pattern="http://archiva.interlocsolutions.com/archiva/repository/internal/[organisation]/[module]/[revision]/[artifact]-[revision].[ext]"/>
+        </url>
+
+		<chain name="chain" returnFirst="true">
+			<resolver ref="local" />
+			<resolver ref="project-local" />
+            <resolver ref="interloc-archiva"/>
+			<ibiblio name="maven2" m2compatible="true" root="http://repo2.maven.org/maven2/" />
+		</chain>
+	</resolvers>
+</ivysettings>
