@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE script SYSTEM "script.dtd">
+<script author="MARTINN" scriptname="iframe_001">
+  <description>Add a custom iframe portlet.</description>
+  <statements>
+    <!-- Add interloc custom portlet support. -->
+    <modify_service servicename="SCCONFIG" classname="com.interlocsolutions.maximo.app.scconfig.ISStartCenterService"/>
+
+    <!-- create application for portlet. -->
+    <create_app app="ISIFRAME" description="Interloc IFrame Portlet" maintbname="ISIFRAMECFG" />
+    <add_sigoption visible="true" app="ISIFRAME" optionname="READ" description="Read/Modify access to IFrame Application Setup" alsorevokes="ALL" esigenabled="false" langcode="EN" />
+    <add_sigoption visible="true" app="ISIFRAME" optionname="NOPORTLET" description="Hide Portlet" esigenabled="false" langcode="EN" />
+
+    <!-- create service for portlet.  The portlet must implement CustomPortletHandler. -->
+    <add_service servicename="ISIFRAME" description="Interloc IFrame Portlet" classname="com.interlocsolutions.maximo.app.iframe.IFrameService" />
+    
+    <!-- create table for iframe configuration. -->
+    <define_table persistent="true" type="system" object="ISIFRAMECFG" description="IFrame Portlet Configuration" service="ISIFRAME" classname="com.interlocsolutions.maximo.app.iframe.ISIFrameCfgSet" mainobject="true" userdefined="true">
+       <attrdef attribute="LAYOUTID" title="layoutid" sameasobject="LAYOUT" sameasattribute="LAYOUTID" remarks="layoutid"/>
+       <attrdef attribute="URL" maxtype="ALN" length="300" persistent="true" title="Url" remarks="URL to display in iframe."/>
+    </define_table>
+
+    <create_relationship name="ISIFRAMECFG" parent="LAYOUT" child="ISIFRAMECFG" whereclause="layoutid = :layoutid" remarks="Relationship between ISIFRAMECFG and LAYOUT.  Used to return iframe urls for a porlet."/>
+
+    <!-- create portlet definition. -->
+    <freeform description="Portlet Definition">
+        <sql target="all">
+insert into portlet (PORTLETID, DESCRIPTION, FORMAT, CONTROLNAME, PORTLETUID) values ('ISIFRAME', 'IFrame', 'Wide', 'isiframeportlet', portletseq.nextval);
+        </sql>
+    </freeform>
+  </statements>
+
+</script>

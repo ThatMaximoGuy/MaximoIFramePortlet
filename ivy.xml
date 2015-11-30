@@ -23,6 +23,9 @@
     </publications>
     
     <dependencies>
+        <!-- Run dependencies -->
+        <dependency org="com.interlocsolutions.maximo" name="MaximoPortlet" rev="1.0.0" conf="run->run;reference->source,javadoc" />
+        
         <!-- Dependencies for compiling Maximo extensions. -->
         <dependency org="com.ibm.maximo" name="asset-management" rev="7.6.0.0" conf="build,test->default" />
         <dependency org="com.ibm.maximo" name="asset-management-webclient" rev="7.6.0.0" conf="build->default"/>
