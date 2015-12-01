@@ -12,12 +12,13 @@
     <add_sigoption visible="true" app="ISIFRAME" optionname="NOPORTLET" description="Hide Portlet" esigenabled="false" langcode="EN" />
 
     <!-- create service for portlet.  The portlet must implement CustomPortletHandler. -->
-    <add_service servicename="ISIFRAME" description="Interloc IFrame Portlet" classname="com.interlocsolutions.maximo.app.iframe.IFrameService" />
+    <add_service servicename="ISIFRAME" description="Interloc IFrame Portlet" classname="com.interlocsolutions.maximo.app.iframe.ISIFrameService" />
     
     <!-- create table for iframe configuration. -->
-    <define_table persistent="true" type="system" object="ISIFRAMECFG" description="IFrame Portlet Configuration" service="ISIFRAME" classname="com.interlocsolutions.maximo.app.iframe.ISIFrameCfgSet" mainobject="true" userdefined="true">
-       <attrdef attribute="LAYOUTID" title="layoutid" sameasobject="LAYOUT" sameasattribute="LAYOUTID" remarks="layoutid"/>
-       <attrdef attribute="URL" maxtype="ALN" length="300" persistent="true" title="Url" remarks="URL to display in iframe."/>
+    <define_table persistent="true" type="system" object="ISIFRAMECFG" description="IFrame Portlet Configuration" service="ISIFRAME" classname="com.interlocsolutions.maximo.app.iframe.ISIFrameCfgSet" mainobject="true">
+       <attrdef attribute="LAYOUTID" title="layoutid" sameasobject="LAYOUT" sameasattribute="LAYOUTID" remarks="layoutid" userdefined="true"/>
+       <attrdef attribute="URL" maxtype="ALN" length="300" persistent="true" title="Url" remarks="URL to display in iframe." userdefined="true"/>
+       <attrdef attribute="SIZEY" maxtype="INTEGER" persistent="true" title="Size" remarks="Number of rows to display in iframe." userdefined="true"/>
     </define_table>
 
     <create_relationship name="ISIFRAMECFG" parent="LAYOUT" child="ISIFRAMECFG" whereclause="layoutid = :layoutid" remarks="Relationship between ISIFRAMECFG and LAYOUT.  Used to return iframe urls for a porlet."/>

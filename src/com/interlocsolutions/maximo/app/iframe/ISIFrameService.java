@@ -20,14 +20,14 @@ import psdi.util.MXException;
  * @author Martin Nichol
  *
  */
-public class IFrameService extends AppService implements CustomPortletHandler {
+public class ISIFrameService extends AppService implements CustomPortletHandler {
 
 	/**
 	 * Constructor.
 	 *
 	 * @throws RemoteException if an RMI problem occurs.
 	 */
-	public IFrameService() throws RemoteException {
+	public ISIFrameService() throws RemoteException {
 		super();
 	}
 
@@ -38,7 +38,7 @@ public class IFrameService extends AppService implements CustomPortletHandler {
 	 * @param mxServer the owning mxserver.
 	 * @throws RemoteException if an RMI problem occurs.
 	 */
-	public IFrameService(MXServer mxServer) throws RemoteException {
+	public ISIFrameService(MXServer mxServer) throws RemoteException {
 		super(mxServer);
 	}
 
@@ -50,6 +50,7 @@ public class IFrameService extends AppService implements CustomPortletHandler {
 		MboSetRemote msr = arg2.getMboSet("ISIFRAMECFG");
 		MboRemote mr = msr.add();
 		mr.setValue("URL", iframeXml.getAttributeValue("url"));
+		mr.setValue("SIZEY", iframeXml.getAttributeValue("sizey"));
 	}
 
 
@@ -67,6 +68,7 @@ public class IFrameService extends AppService implements CustomPortletHandler {
 			MboRemote mr = msr.getMbo(0);
 			Element iframeXml = new Element(xmlNodeName());
 			iframeXml.setAttribute("url", mr.getString("URL"));
+			iframeXml.setAttribute("sizey", mr.getString("SIZEY"));
 			arg0.addContent(iframeXml);
 		} finally {
 			if (msr != null) {

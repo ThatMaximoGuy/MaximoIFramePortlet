@@ -208,25 +208,25 @@
 	<target name="ftp" depends="init" description="FTP the created JAR files to the server.">
 		<ftp server="${ftp.server}" remotedir="ibm\WebSphere\AppServer\profiles\ctgAppSrv01\installedApps\ctgCell01\MAXIMO.ear\lib" userid="${ftp.user}" password="${ftp.password}" separator="\" verbose="yes" passive="true">
 			<fileset dir="${ivy.distrib.dir}/jars">
-				<include name="${package.name.mbo.jar}"/>
+				<include name="${package.name.mbo.jar.deploy}"/>
 			</fileset>
 		</ftp>
 
 		<ftp server="${ftp.server}" remotedir="IBM\SMP\maximo\applications\maximo\lib" userid="${ftp.user}" password="${ftp.password}" separator="\" verbose="yes" passive="true">
 			<fileset dir="${ivy.distrib.dir}/jars">
-				<include name="${package.name.mbo.jar}"/>
+				<include name="${package.name.mbo.jar.deploy}"/>
 			</fileset>
 		</ftp>
 
 		<ftp server="${ftp.server}" remotedir="ibm\WebSphere\AppServer\profiles\ctgAppSrv01\installedApps\ctgCell01\MAXIMO.ear\maximouiweb.war\WEB-INF\lib" userid="${ftp.user}" password="${ftp.password}" separator="\" verbose="yes" passive="true">
 			<fileset dir="${ivy.distrib.dir}/jars">
-				<include name="${package.name.ui.jar}"/>
+				<include name="${package.name.ui.jar.deploy}"/>
 			</fileset>
 		</ftp>
 
 		<ftp server="${ftp.server}" remotedir="ibm\SMP\maximo\applications\maximo\maximouiweb\webmodule\WEB-INF\lib" userid="${ftp.user}" password="${ftp.password}" separator="\" verbose="yes" passive="true">
 			<fileset dir="${ivy.distrib.dir}/jars">
-				<include name="${package.name.ui.jar}"/>
+				<include name="${package.name.ui.jar.deploy}"/>
 			</fileset>
 		</ftp>
 	</target>
@@ -235,7 +235,7 @@
 	<target name="scp" depends="init" description="SCP the created JAR filese to the server">
 		<scp trust="true" todir="${scp.user}:${scp.password}@${scp.server}:/opt/IBM/WebSphere/AppServer/profiles/ctgAppSrv01/installedApps/ctgCell01/MAXIMO.ear/lib">
 			<fileset dir="${ivy.distrib.dir}/jars">
-				<include name="${package.name.mbo.jar}"/>
+				<include name="${package.name.mbo.jar.deploy}"/>
 			</fileset>
 		</scp>
 		<scp trust="true" todir="${scp.user}:${scp.password}@${scp.server}:/opt/IBM/WebSphere/AppServer/profiles/ctgAppSrv01/installedApps/ctgCell01/MAXIMO.ear/maximouiweb.war/WEB-INF/lib">
@@ -279,7 +279,9 @@
 		</if>
 		<property file="${basedir}/build.version.properties"/>
 		<property name="package.name.mbo.jar" value="${package.name}-${revision}.jar"/>
+		<property name="package.name.mbo.jar.deploy" value="${package.name}.jar"/>
 		<property name="package.name.ui.jar" value="${package.name}-ui-${revision}.jar"/>
+		<property name="package.name.ui.jar.deploy" value="${package.name}-ui.jar"/>
 		<property name="package.name.zip" value="${package.name}-${revision}.zip"/>
 		<property name="package.name.javadoc" value="${package.name}-javadoc-${revision}.zip"/>
 		<property name="package.name.source" value="${package.name}-source-${revision}.zip"/>
@@ -391,8 +393,8 @@
 				<include name="deployment/product/${package.name}.xml"/>
 			</fileset>
 			<!-- this will copy the jar files into the package. -->
-			<zipfileset dir="${ivy.distrib.dir}/jars" includes="${package.name.mbo.jar}" prefix="applications/maximo/lib/"/>
-			<zipfileset dir="${ivy.distrib.dir}/jars" includes="${package.name.ui.jar}" prefix="applications/maximo/maximouiweb/webmodule/WEB-INF/lib/"/>
+			<zipfileset dir="${ivy.distrib.dir}/jars" includes="${package.name.mbo.jar}" fullpath="applications/maximo/lib/${package.name.mbo.jar.deploy}"/>
+			<zipfileset dir="${ivy.distrib.dir}/jars" includes="${package.name.ui.jar}" fullpath="applications/maximo/maximouiweb/webmodule/WEB-INF/lib/${package.name.ui.jar.deploy}"/>
 		</zip>
 
 		<if>
@@ -448,7 +450,7 @@
 				<fileset dir="${lib.dir}">
 					<include name="run/*.jar"/>
 				</fileset>
-				<pathelement location="${package.name.mbo.jar}"/>
+				<pathelement location="${package.name.mbo.jar.deploy}"/>
 			</path>
 			<chainedmapper>
 				<flattenmapper/>
@@ -460,8 +462,8 @@
 		<copy file="deployment/product/product.xml.template" tofile="${build.dir}/deployment/product/${package.name}.xml" overwrite="true">
 			<filterset>
 				<filter token="APPNAME" value="${package.name}"/>
-				<filter token="MBOJARFILE" value="${package.name.mbo.jar}"/>
-				<filter token="WEBJARFILE" value="${package.name.ui.jar}"/>
+				<filter token="MBOJARFILE" value="${package.name.mbo.jar.deploy}"/>
+				<filter token="WEBJARFILE" value="${package.name.ui.jar.deploy}"/>
 				<filter token="RUNJARPATH" value="${testpath}"/>
 			</filterset>
 		</copy>
