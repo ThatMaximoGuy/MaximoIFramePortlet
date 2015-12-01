@@ -30,6 +30,7 @@
         <dependency org="com.ibm.maximo" name="asset-management" rev="7.6.0.0" conf="build,test->default" />
         <dependency org="com.ibm.maximo" name="asset-management-webclient" rev="7.6.0.0" conf="build->default"/>
         <dependency org="org.apache.geronimo.specs"  name="geronimo-j2ee_1.4_spec" rev="1.1" conf="build->default"/>
+        <dependency org="org.jdom" name="jdom" rev="1.1" conf="build->default"/>
                 
         <!-- Maximo javadoc is separate because there are more "flavours" of Maximo than "flavours" of the javadoc --> 
         <dependency org="com.ibm.maximo" name="asset-management-javadoc" rev="7.6.0.0" conf="reference->javadoc" />
