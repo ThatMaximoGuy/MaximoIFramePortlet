@@ -387,7 +387,7 @@
 		</jar>
 	</target>
 
-	<target name="package.zip" depends="app.appxml,package.jar.mbo,package.jar.webclient,tools.compile" unless="${skip.package.zip}">
+	<target name="package.zip" depends="app.appxml,package.jar.mbo,package.jar.webclient,tools.compile,applications.compile" unless="${skip.package.zip}">
 		<zip destfile="${ivy.distrib.dir}/zips/${package.name.zip}">
 			<fileset dir="${build.dir}">
 				<include name="deployment/product/${package.name}.xml"/>
@@ -421,6 +421,15 @@
 				</zip>
 			</then>
 		</if>
+		<if>
+			<available file="${build.dir}/applications" type="dir"/>
+			<then>
+				<zip destfile="${ivy.distrib.dir}/zips/${package.name.zip}" update="true">
+					<zipfileset dir="${build.dir}/applications" includes="**/*" prefix="applications"/>
+				</zip>
+			</then>
+		</if>
+
 	</target>
 
 	<target name="deploy.local" depends="package.zip">
@@ -503,6 +512,20 @@
 				<mkdir dir="${build.dir}/tools"/>
 				<copy todir="${build.dir}/tools">
 					<fileset dir="${basedir}/tools">
+						<exclude name="**/*.java"/>
+					</fileset>
+				</copy>
+			</then>
+		</if>
+	</target>
+
+	<target name="applications.compile" depends="init,ivy.resolve">
+		<if>
+			<available file="${basedir}/applications" type="dir"/>
+			<then>
+				<mkdir dir="${build.dir}/applications"/>
+				<copy todir="${build.dir}/applications">
+					<fileset dir="${basedir}/applications">
 						<exclude name="**/*.java"/>
 					</fileset>
 				</copy>
