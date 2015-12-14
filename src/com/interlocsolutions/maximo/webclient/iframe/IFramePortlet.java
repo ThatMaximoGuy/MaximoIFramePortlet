@@ -20,6 +20,7 @@ public class IFramePortlet extends PortletDataInstance {
 		super();
 	}
 
+
 	/**
 	 * @return return the vertical size of the iframe.
 	 */
@@ -33,6 +34,7 @@ public class IFramePortlet extends PortletDataInstance {
 		}
 		return 200;
 	}
+
 
 	/**
 	 * @return return the url to display.
