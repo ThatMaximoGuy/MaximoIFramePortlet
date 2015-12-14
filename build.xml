@@ -254,6 +254,42 @@
 		/>
 	</target>
 
+	<target name="was.update" depends="was.update.mbo,was.update.ui" description="Update a WAS installed application">
+	</target>
+
+	<target name="package.zip.was" depends="app.appxml,package.jar.mbo,package.jar.webclient" description="Create a WAS Deployable zip file">
+		<zip destfile="${ivy.distrib.dir}/zips/${package.name.zip.was}">
+			<zipfileset dir="${basedir}/applications/maximo/maximouiweb/webmodule" prefix="maximouiweb.war/">
+				<exclude name="WEB-INF/web-*.xml"/>
+				<exclude name="WEB-INF/src/**"/>
+			</zipfileset>
+			<zipfileset dir="${basedir}/applications/maximo/meaweb/webmodule" prefix="meaweb.war/">
+				<exclude name="WEB-INF/src/**"/>
+			</zipfileset>
+		</zip>
+		<if>
+			<available file="${lib.dir}/run" type="dir"/>
+			<then>
+				<zip destfile="${ivy.distrib.dir}/zips/${package.name.zip.was}" update="true">
+					<zipfileset dir="${lib.dir}/run" includes="*" prefix="lib/"/>
+				</zip>
+			</then>
+		</if>
+		<if>
+			<available file="${lib.dir}/runui" type="dir"/>
+			<then>
+				<zip destfile="${ivy.distrib.dir}/zips/${package.name.zip.was}" update="true">
+					<zipfileset dir="${lib.dir}/runui" includes="*" prefix="maximouiweb.war/WEB-INF/lib/"/>
+				</zip>
+			</then>
+		</if>
+
+		<zip destfile="${ivy.distrib.dir}/zips/${package.name.zip.was}" update="true">
+			<zipfileset dir="${ivy.distrib.dir}/jars" includes="${package.name.mbo.jar}" fullpath="lib/${package.name.mbo.jar.deploy}"/>
+			<zipfileset dir="${ivy.distrib.dir}/jars" includes="${package.name.ui.jar}" fullpath="maximouiweb.war/WEB-INF/lib/${package.name.ui.jar.deploy}"/>
+		</zip>
+	</target>
+
 	<!-- internal: initialize the property file -->
 	<target name="init.properties">
 		<if>
@@ -283,6 +319,7 @@
 		<property name="package.name.ui.jar" value="${package.name}-ui-${revision}.jar"/>
 		<property name="package.name.ui.jar.deploy" value="${package.name}-ui.jar"/>
 		<property name="package.name.zip" value="${package.name}-${revision}.zip"/>
+		<property name="package.name.zip.was" value="${package.name}-${revision}-was.zip"/>
 		<property name="package.name.javadoc" value="${package.name}-javadoc-${revision}.zip"/>
 		<property name="package.name.source" value="${package.name}-source-${revision}.zip"/>
 	</target>
@@ -563,5 +600,14 @@
 			</or>
 		</condition>
 	</target>
+
+	<target name="was.update.ui" depends="package.jar.webclient">
+		<copy tofile="${was.maximo.ear.ui}/${package.name.ui.jar.deploy}" verbose="true" file="${ivy.distrib.dir}/jars/${package.name.ui.jar}"/>
+	</target>
+
+	<target name="was.update.mbo" depends="package.jar.mbo">
+		<copy tofile="${was.maximo.ear.mbo}/${package.name.mbo.jar.deploy}" verbose="true" file="${ivy.distrib.dir}/jars/${package.name.mbo.jar}"/>
+	</target>
+
 
 </project>

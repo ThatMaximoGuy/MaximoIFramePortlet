@@ -60,3 +60,12 @@ skip.package.zip=false
 # username and password for Interloc repository
 repo.username.interloc=${user.name}
 repo.password.interloc=
+
+# IBM WebSphere deployment
+was.home=C:/IBM/WebSphere/AppServer/profiles
+was.profile.name=ctgAppSrv01
+was.cell.name=ctgCell01
+was.maximo.ear=${was.home}/${was.profile.name}/installedApps/${was.cell.name}/MAXIMO.ear
+was.maximo.ear.mbo=${was.maximo.ear}/lib
+was.maximo.ear.ui=${was.maximo.ear}/maximouiweb.war/WEB-INF/lib
+
