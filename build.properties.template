@@ -1,7 +1,9 @@
 #Standard and required paths
 bin.dir=${basedir}/bin
-src.dir=${basedir}/src
-test.dir=${basedir}/tests
+src.mbo.dir=${basedir}/src-mbo
+src.test.dir=${basedir}/src-tests
+src.ui.dir=${basedir}/src-ui
+src.tools.dir=${basedir}/src-tools
 doc.dir=${basedir}/doc
 lib.dir=${basedir}/lib
 build.dir=${basedir}/build
@@ -52,9 +54,10 @@ scp.server=192.168.1.147
 # Skip aspects of build process.
 # the format is skip.buildTarget.
 skip.package.jar.mbo=false
+skip.package.jar.webclient=false
+skip.package.jar.tools=false
 skip.package.javadoc=false
 skip.package.source=false
-skip.package.jar.webclient=false
 skip.package.zip=false
 
 # username and password for Interloc repository

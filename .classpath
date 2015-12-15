@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" path="tests"/>
+	<classpathentry kind="src" path="src-mbo"/>
+	<classpathentry kind="src" path="src-tests"/>
 	<classpathentry kind="src" path="properties"/>
+	<classpathentry kind="src" path="src-tools"/>
+	<classpathentry kind="src" path="src-ui"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/test/activeio-core.jar"/>
 	<classpathentry kind="lib" path="lib/test/activemq-core.jar"/>

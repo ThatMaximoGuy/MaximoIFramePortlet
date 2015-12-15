@@ -1,7 +1,7 @@
 <%@ include file="../common/simpleheader.jsp"%>
 <%
 String layoutId =  component.getProperty("layoutid");
-PortletDataInstance portletControl = (PortletDataInstance)control;
+IFramePortlet portletControl = (IFramePortlet)control;
 PortletStateImpl portletStateManager = portletControl.getStateManager();
 
 //if the portlet has not been loaded ever call this.
@@ -21,7 +21,7 @@ if(portletStateManager.isPortletNotLoaded(component)) {
 		{	
 			holderId="portletbody_"+layoutId;	
 %>
-<div>Hello there everybody.</div>
+<iframe src="<%= portletControl.getUrl() %>" height="<%= portletControl.getSizeY() %>">iframe unsupported</iframe>
 <!--  portlet content here -->
 <script>finishPortlet("<%=layoutId%>");</script><%="]]>"%></component>
 <%			portletStateManager.setStateLoaded();

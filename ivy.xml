@@ -6,7 +6,8 @@
         <!-- build must compile both businessobject and webclient code, so extends both confs -->
         <!-- test can only run businessobject code, so it only extends run conf -->           	
         <conf name="run" visibility="public" description="jars used to run; end up in lib" />
-        <conf name="runui" visibility="public" description="jars used to run; end up in WEB-INF/lib" />
+        <conf name="runui" visibility="public" description="jars used to run webclient; end up in WEB-INF/lib" />
+        <conf name="runtools" visibility="public" description="jars used to run tools; end up in tools/lib" />
         <conf name="javadoc" visibility="public" description="javadoc for project" />
 		<conf name="source" visibility="public" description="source for this project" />
         <conf name="reference" visibility="private" description="javadoc for this project that should not get republished" />

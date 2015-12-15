@@ -26,7 +26,6 @@
 	<!-- ================================= 
           Standard project properties file     
          ================================= -->
-	<property name="lib.dir" value="${basedir}/lib"/>
 	<property file="${basedir}/build.properties"/>
 
 
@@ -35,8 +34,7 @@
           Classpath configuration 
          ================================= -->
 	<!-- Application classpath -->
-	<path id="app.classpath">
-		<pathelement location="${src.dir}"/>
+	<path id="ant.classpath">
 		<fileset dir="${lib.dir}">
 			<include name="*.jar"/>
 		</fileset>
@@ -55,7 +53,7 @@
 		</fileset>
 	</path>
 
-	<taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="app.classpath"/>
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="ant.classpath"/>
 
 	<!-- ================================= 
           target: Main build target, builds and packages the application.
@@ -69,8 +67,11 @@
 	<target name="init" depends="init.properties,ivy.resolve" description="Initialize build environment.">
 		<mkdir dir="${build.dir}"/>
 		<mkdir dir="${build.dir}/main"/>
+		<mkdir dir="${build.dir}/mainui"/>
 		<mkdir dir="${build.dir}/tests"/>
 		<mkdir dir="${build.dir}/javadoc"/>
+		<mkdir dir="${build.dir}/applications"/>
+		<mkdir dir="${build.dir}/tools"/>
 		<mkdir dir="${ivy.distrib.dir}/jars"/>
 		<mkdir dir="${ivy.distrib.dir}/zips"/>
 	</target>
@@ -90,7 +91,7 @@
 	</target>
 
 
-	<target name="test" depends="test.compile" description="Run JUnit tests">
+	<target name="test" depends="compile.test" description="Run JUnit tests">
 		<if>
 			<isset property="maximo.home"/>
 			<then>
@@ -103,6 +104,8 @@
 					<fileset dir="${maximo.home}/applications/maximo/lib/">
 						<include name="*.jar"/>
 						<exclude name="ant.jar"/>
+						<exclude name="slf4j-*.jar"/> 
+						
 					</fileset>
 				</path>
 			</then>
@@ -121,12 +124,11 @@
 			<formatter type="brief" usefile="false" />
 			<classpath>
 				<path refid="lib.test.classpath"/>
-				<path refid="app.classpath"/>
 				<path refid="test.classpath" />
 			</classpath>
 
 			<batchtest fork="yes" todir="${build.dir}">
-				<fileset dir="${test.dir}" includes="**/*Test.java"/>
+				<fileset dir="${src.test.dir}" includes="**/*Test.java"/>
 			</batchtest>
 		</junit>
 	</target>
@@ -141,10 +143,11 @@
 	</target>
 
 	<target name="javadoc" depends="init" description="Generate JavaDoc for this project">
-		<javadoc sourcepath="${src.dir}" destdir="${build.dir}/javadoc" access="protected" breakiterator="true">
-			<classpath refid="app.classpath"/>
+		<javadoc destdir="${build.dir}/javadoc" access="protected" breakiterator="true">
+			<packageset dir="${src.mbo.dir}" defaultexcludes="yes"/>
+			<packageset dir="${src.ui.dir}" defaultexcludes="yes"/>
 			<classpath refid="lib.build.classpath"/>
-			<link href="http://docs.oracle.com/javase/1.5.0/docs/api/"/>
+			<link href="http://docs.oracle.com/javase/6/docs/api/"/>
 			<link href="http://docs.oracle.com/javaee/1.4/api/"/>
 		</javadoc>
 	</target>
@@ -257,7 +260,7 @@
 	<target name="was.update" depends="was.update.mbo,was.update.ui" description="Update a WAS installed application">
 	</target>
 
-	<target name="package.zip.was" depends="app.appxml,package.jar.mbo,package.jar.webclient" description="Create a WAS Deployable zip file">
+	<target name="package.zip.was" depends="compile.appxml,package.jar.mbo,package.jar.webclient" description="Create a WAS Deployable zip file">
 		<zip destfile="${ivy.distrib.dir}/zips/${package.name.zip.was}">
 			<zipfileset dir="${basedir}/applications/maximo/maximouiweb/webmodule" prefix="maximouiweb.war/">
 				<exclude name="WEB-INF/web-*.xml"/>
@@ -318,6 +321,8 @@
 		<property name="package.name.mbo.jar.deploy" value="${package.name}.jar"/>
 		<property name="package.name.ui.jar" value="${package.name}-ui-${revision}.jar"/>
 		<property name="package.name.ui.jar.deploy" value="${package.name}-ui.jar"/>
+		<property name="package.name.tools.jar" value="${package.name}-tools-${revision}.jar"/>
+		<property name="package.name.tools.jar.deploy" value="${package.name}-tools.jar"/>
 		<property name="package.name.zip" value="${package.name}-${revision}.zip"/>
 		<property name="package.name.zip.was" value="${package.name}-${revision}-was.zip"/>
 		<property name="package.name.javadoc" value="${package.name}-javadoc-${revision}.zip"/>
@@ -355,7 +360,7 @@
 			<fileset dir="${ivy.jar.dir}" includes="*.jar"/>
 		</path>
 
-		<taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="app.classpath"/>
+		<taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="ant.classpath"/>
 	</target>
 
 	<target name="ivy.configure" depends="ivy.install">
@@ -367,26 +372,51 @@
 		<ivy:retrieve pattern="${ivy.lib.dir}/[conf]/[artifact].[ext]" overwriteMode="newer"/>
 	</target>
 
-	<target name="package.jar.mbo" depends="app.compile" unless="${skip.package.jar.mbo}">
+	<target name="package.jar.mbo" depends="compile.mbo" unless="${skip.package.jar.mbo}">
+		<antcall target="generic.package.jar">
+			<param name="local.src" value="${build.dir}/main"/>
+			<param name="local.dest" value="${ivy.distrib.dir}/jars/${package.name.mbo.jar}"/>
+			<param name="local.name" value="Business Objects"/>
+		</antcall>
+		<jar destfile="${ivy.distrib.dir}/jars/${package.name.mbo.jar}" update="true">
+			<fileset dir="${basedir}" includes="META-INF/interloc.xml"/>	
+		</jar>
+	</target>
+
+	<target name="package.jar.webclient" depends="compile.ui" unless="${skip.package.jar.webclient}">
+		<antcall target="generic.package.jar">
+			<param name="local.src" value="${build.dir}/mainui"/>
+			<param name="local.dest" value="${ivy.distrib.dir}/jars/${package.name.ui.jar}"/>
+			<param name="local.name" value="User Interface"/>
+		</antcall>
+	</target>
+
+	<target name="package.jar.tools" depends="compile.tools" unless="${skip.package.jar.tools}">
+		<antcall target="generic.package.jar">
+			<param name="local.src" value="${build.dir}/tools"/>
+			<param name="local.dest" value="${ivy.distrib.dir}/jars/${package.name.tools.jar}"/>
+			<param name="local.name" value="Tools"/>
+		</antcall>
+	</target>
+
+	<target name="generic.package.jar">
 		<!-- Jar up everything  -->
-		<jar destfile="${ivy.distrib.dir}/jars/${package.name.mbo.jar}">
+		<jar destfile="${local.dest}">
 			<manifest>
 				<!-- Information about the program itself -->
 				<attribute name="Implementation-Vendor" value="${manifest.impl.vendor}"/>
-				<attribute name="Implementation-Title" value="${manifest.impl.title} - Business Objects"/>
+				<attribute name="Implementation-Title" value="${manifest.impl.title} - ${local.name}"/>
 				<attribute name="Implementation-Version" value="${revision}"/>
 
 				<attribute name="Specification-Vendor" value="${manifest.spec.vendor}"/>
-				<attribute name="Specification-Title" value="${manifest.spec.title} - Business Objects"/>
+				<attribute name="Specification-Title" value="${manifest.spec.title} - ${local.name}"/>
 				<attribute name="Specification-Version" value="${manifest.spec.version}"/>
 			</manifest>
-			<fileset dir="${build.dir}/main">
-				<exclude name="**/webclient/**"/>
+			<fileset dir="${local.src}">
 				<exclude name="**/*Test.class"/>
 				<exclude name="test/**"/>
 				<exclude name="**/test/**"/>
 			</fileset>
-			<fileset dir="${basedir}" includes="META-INF/interloc.xml"/>
 		</jar>
 	</target>
 
@@ -396,42 +426,25 @@
 
 	<target name="package.source" depends="init" unless="${skip.package.source}">
 		<zip destfile="${ivy.distrib.dir}/zips/${package.name.source}">
-			<fileset dir="${src.dir}">
+			<fileset dir="${src.mbo.dir}">
+				<include name="**/*.java" />
+			</fileset>
+			<fileset dir="${src.ui.dir}">
+				<include name="**/*.java" />
+			</fileset>
+			<fileset dir="${src.tools.dir}">
 				<include name="**/*.java" />
 			</fileset>
 		</zip>
 	</target>
 
-	<target name="package.jar.webclient" depends="app.compile" unless="${skip.package.jar.webclient}">
-		<!-- Jar up everything  -->
-		<jar destfile="${ivy.distrib.dir}/jars/${package.name.ui.jar}">
-			<manifest>
-				<!-- Information about the program itself -->
-				<attribute name="Implementation-Vendor" value="${manifest.impl.vendor}"/>
-				<attribute name="Implementation-Title" value="${manifest.impl.title} - User Interface"/>
-				<attribute name="Implementation-Version" value="${revision}"/>
-
-				<attribute name="Specification-Vendor" value="${manifest.spec.vendor}"/>
-				<attribute name="Specification-Title" value="${manifest.spec.title} - User Interface"/>
-				<attribute name="Specification-Version" value="${manifest.spec.version}"/>
-			</manifest>
-			<fileset dir="${build.dir}/main">
-				<include name="**/webclient/**"/>
-				<exclude name="**/*Test.class"/>
-				<exclude name="test/**"/>
-				<exclude name="**/test/**"/>
-			</fileset>
-		</jar>
-	</target>
-
-	<target name="package.zip" depends="app.appxml,package.jar.mbo,package.jar.webclient,tools.compile,applications.compile" unless="${skip.package.zip}">
+		
+	<target name="package.zip" depends="compile.appxml,package.jar.mbo,package.jar.webclient,compile.tools,compile.applications" unless="${skip.package.zip}">
 		<zip destfile="${ivy.distrib.dir}/zips/${package.name.zip}">
-			<fileset dir="${build.dir}">
-				<include name="deployment/product/${package.name}.xml"/>
-			</fileset>
 			<!-- this will copy the jar files into the package. -->
 			<zipfileset dir="${ivy.distrib.dir}/jars" includes="${package.name.mbo.jar}" fullpath="applications/maximo/lib/${package.name.mbo.jar.deploy}"/>
 			<zipfileset dir="${ivy.distrib.dir}/jars" includes="${package.name.ui.jar}" fullpath="applications/maximo/maximouiweb/webmodule/WEB-INF/lib/${package.name.ui.jar.deploy}"/>
+			<zipfileset dir="${ivy.distrib.dir}/jars" includes="${package.name.tools.jar}" fullpath="tools/maximo/lib/${package.name.tools.jar.deploy}"/>
 		</zip>
 
 		<if>
@@ -447,6 +460,23 @@
 			<then>
 				<zip destfile="${ivy.distrib.dir}/zips/${package.name.zip}" update="true">
 					<zipfileset dir="${lib.dir}/runui" includes="*" prefix="applications/maximo/maximouiweb/webmodule/WEB-INF/lib/"/>
+				</zip>
+			</then>
+		</if>
+		<if>
+			<available file="${lib.dir}/tools" type="dir"/>
+			<then>
+				<zip destfile="${ivy.distrib.dir}/zips/${package.name.zip}" update="true">
+					<zipfileset dir="${lib.dir}/tools" includes="*" prefix="tools/maximo/lib/"/>
+				</zip>
+			</then>
+		</if>
+
+		<if>
+			<available file="${build.dir}/deployment" type="dir"/>
+			<then>
+				<zip destfile="${ivy.distrib.dir}/zips/${package.name.zip}" update="true">
+					<zipfileset dir="${build.dir}/deployment" includes="**/*" prefix="deployment"/>
 				</zip>
 			</then>
 		</if>
@@ -469,28 +499,24 @@
 
 	</target>
 
+	<!-- deploy (unzip) the zip file to a local maximo directory --> 
 	<target name="deploy.local" depends="package.zip">
 		<unzip src="${ivy.distrib.dir}/zips/${package.name.zip}" dest="${maximo.home}" overwrite="true"/>
 	</target>
 
-	<target name="test.compile" depends="app.compile">
-		<!-- Compile the source files to the bin directory -->
-		<javac srcdir="${test.dir}" destdir="${build.dir}/tests" debug="true" includeantruntime="false">
-			<classpath>
-				<path refid="lib.test.classpath"/>
-				<path refid="lib.build.classpath"/>
-				<path refid="app.classpath"/>
-				<pathelement location="${build.dir}/main"/>
-			</classpath>
-		</javac>
-		<copy todir="${build.dir}/tests">
-			<fileset dir="${test.dir}">
-				<exclude name="**/*.java"/>
-			</fileset>
-		</copy>
+	<!-- copy the ui (webclient) jar into a local was instance -->
+	<target name="was.update.ui" depends="package.jar.webclient">
+		<copy tofile="${was.maximo.ear.ui}/${package.name.ui.jar.deploy}" verbose="true" file="${ivy.distrib.dir}/jars/${package.name.ui.jar}"/>
 	</target>
 
-	<target name="app.appxml" depends="init">
+	<!-- copy the mbo (business objects) jar into a local was instance -->
+	<target name="was.update.mbo" depends="package.jar.mbo">
+		<copy tofile="${was.maximo.ear.mbo}/${package.name.mbo.jar.deploy}" verbose="true" file="${ivy.distrib.dir}/jars/${package.name.mbo.jar}"/>
+	</target>
+
+	
+	<!-- build / compile related targets -->
+	<target name="compile.appxml" depends="init">
 		<pathconvert property="testpath" targetos="unix" pathsep=" ">
 			<path>
 				<fileset dir="${lib.dir}">
@@ -515,61 +541,82 @@
 		</copy>
 	</target>
 
-	<!-- ================================= 
-          target: Compile application code to the build folder.              
-         ================================= -->
-	<target name="app.compile" depends="init,ivy.resolve">
-		<!-- Compile the source files to the bin directory -->
-		<javac srcdir="${src.dir}" destdir="${build.dir}/main" debug="${debug}" target="${java.target}" source="${java.source}" includeantruntime="false">
-			<classpath refid="app.classpath"/>
-			<classpath refid="lib.build.classpath"/>
+	<target name="compile.mbo" depends="init,ivy.resolve">
+		<antcall target="generic.compile">
+			<param name="local.src" value="${src.mbo.dir}"/>
+			<param name="local.dest" value="${build.dir}/main"/>
+			<param name="local.classpath" value="lib.build.classpath"/>
+		</antcall>
+		<antcall target="generic.copy">
+			<param name="local.src" value="${src.mbo.dir}"/>
+			<param name="local.dest" value="${build.dir}/main"/>
+		</antcall>
+	</target>
+
+	<target name="compile.ui" depends="init,ivy.resolve">
+		<antcall target="generic.compile">
+			<param name="local.src" value="${src.ui.dir}"/>
+			<param name="local.dest" value="${build.dir}/mainui"/>
+			<param name="local.classpath" value="lib.build.classpath"/>
+		</antcall>
+		<antcall target="generic.copy">
+			<param name="local.src" value="${src.ui.dir}"/>
+			<param name="local.dest" value="${build.dir}/mainui"/>
+		</antcall>
+	</target>
+
+	<target name="compile.tools" depends="init,ivy.resolve">
+		<antcall target="generic.compile">
+			<param name="local.src" value="${src.tools.dir}"/>
+			<param name="local.dest" value="${build.dir}/tools"/>
+			<param name="local.classpath" value="lib.build.classpath"/>
+		</antcall>
+		<antcall target="generic.copy">
+			<param name="local.src" value="${src.tools.dir}"/>
+			<param name="local.dest" value="${build.dir}/tools"/>
+		</antcall>
+	</target>
+
+	<target name="compile.test" depends="compile.mbo">
+		<javac srcdir="${src.test.dir}" destdir="${build.dir}/tests" debug="true" includeantruntime="false">
+			<classpath>
+				<path refid="lib.test.classpath"/>
+				<pathelement location="${build.dir}/main"/>
+			</classpath>
 		</javac>
-		<copy todir="${build.dir}/main">
-			<fileset dir="${src.dir}">
-				<exclude name="**/*.java"/>
-			</fileset>
-		</copy>
-
-		<!-- Rmic exmaple should you have new remote stubs -->
-		<!--
-		<rmic base="${build.dir}/main" stubversion="1.2">
-			<classpath refid="app.classpath"/>
-			<classpath refid="lib.build.classpath"/>
-			
-			<include name="**/ClassName*.class"/>
-			<exclude name="**/*Remote.class"/>
-	    </rmic>
-		-->
+		<antcall target="generic.copy">
+			<param name="local.src" value="${src.test.dir}"/>
+			<param name="local.dest" value="${build.dir}/tests"/>
+		</antcall>
 	</target>
 
-	<target name="tools.compile" depends="init,ivy.resolve">
+	<target name="compile.applications" depends="init,ivy.resolve">
+		<antcall target="generic.copy">
+			<param name="local.src" value="${basedir}/applications"/>
+			<param name="local.dest" value="${build.dir}/applications"/>
+		</antcall>
+	</target>
+
+	<target name="generic.compile">
+		<javac srcdir="${local.src}" destdir="${local.dest}" debug="${debug}" target="${java.target}" source="${java.source}" includeantruntime="false">
+			<classpath refid="${local.classpath}"/>
+		</javac>
+	</target>
+
+	<target name="generic.copy">
 		<if>
-			<available file="${basedir}/tools" type="dir"/>
+			<available file="${local.src}" type="dir" />
 			<then>
-				<mkdir dir="${build.dir}/tools"/>
-				<copy todir="${build.dir}/tools">
-					<fileset dir="${basedir}/tools">
-						<exclude name="**/*.java"/>
+				<copy todir="${local.dest}">
+					<fileset dir="${local.src}">
+						<exclude name="**/*.java" />
 					</fileset>
 				</copy>
 			</then>
 		</if>
 	</target>
-
-	<target name="applications.compile" depends="init,ivy.resolve">
-		<if>
-			<available file="${basedir}/applications" type="dir"/>
-			<then>
-				<mkdir dir="${build.dir}/applications"/>
-				<copy todir="${build.dir}/applications">
-					<fileset dir="${basedir}/applications">
-						<exclude name="**/*.java"/>
-					</fileset>
-				</copy>
-			</then>
-		</if>
-	</target>
-
+	
+	
 	<!-- clean up the lib directory unless ivy has been disabled -->
 	<target name="clean.lib" unless="${ivy.disable}">
 		<delete dir="${lib.dir}/ant"/>
@@ -577,6 +624,7 @@
 		<delete dir="${lib.dir}/test"/>
 		<delete dir="${lib.dir}/run"/>
 		<delete dir="${lib.dir}/runui"/>
+		<delete dir="${lib.dir}/tools"/>
 		<delete dir="${lib.dir}/javadoc"/>
 		<delete dir="${lib.dir}/reference"/>
 		<delete dir="${lib.dir}/source"/>
@@ -600,14 +648,4 @@
 			</or>
 		</condition>
 	</target>
-
-	<target name="was.update.ui" depends="package.jar.webclient">
-		<copy tofile="${was.maximo.ear.ui}/${package.name.ui.jar.deploy}" verbose="true" file="${ivy.distrib.dir}/jars/${package.name.ui.jar}"/>
-	</target>
-
-	<target name="was.update.mbo" depends="package.jar.mbo">
-		<copy tofile="${was.maximo.ear.mbo}/${package.name.mbo.jar.deploy}" verbose="true" file="${ivy.distrib.dir}/jars/${package.name.mbo.jar}"/>
-	</target>
-
-
 </project>
