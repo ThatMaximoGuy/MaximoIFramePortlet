@@ -47,6 +47,13 @@
 		</fileset>
 	</path>
 
+	<path id="lib.tools.classpath">
+		<fileset dir="lib">
+			<include name="runtools/*.jar"/>
+			<include name="build/*.jar"/>
+		</fileset>
+	</path>
+
 	<path id="lib.test.classpath">
 		<fileset dir="lib">
 			<include name="test/*.jar"/>
@@ -66,12 +73,13 @@
          ================================= -->
 	<target name="init" depends="init.properties,ivy.resolve" description="Initialize build environment.">
 		<mkdir dir="${build.dir}"/>
-		<mkdir dir="${build.dir}/main"/>
-		<mkdir dir="${build.dir}/mainui"/>
-		<mkdir dir="${build.dir}/tests"/>
+		<mkdir dir="${build.dir}/class-mbo"/>
+		<mkdir dir="${build.dir}/class-ui"/>
+		<mkdir dir="${build.dir}/class-tests"/>
 		<mkdir dir="${build.dir}/javadoc"/>
 		<mkdir dir="${build.dir}/applications"/>
 		<mkdir dir="${build.dir}/tools"/>
+		<mkdir dir="${build.dir}/class-tools"/>
 		<mkdir dir="${ivy.distrib.dir}/jars"/>
 		<mkdir dir="${ivy.distrib.dir}/zips"/>
 	</target>
@@ -96,8 +104,8 @@
 			<isset property="maximo.home"/>
 			<then>
 				<path id="test.classpath">
-					<pathelement location="${build.dir}/tests"/>
-					<pathelement location="${build.dir}/main"/>
+					<pathelement location="${build.dir}/class-tests"/>
+					<pathelement location="${build.dir}/class-mbo"/>
 					<pathelement location="${maximo.home}/applications/"/>
 					<pathelement location="${maximo.home}/applications/maximo/businessobjects/classes/"/>
 					<pathelement location="${maximo.home}/applications/maximo/properties/"/>
@@ -111,8 +119,8 @@
 			</then>
 			<else>
 				<path id="test.classpath">
-					<pathelement location="${build.dir}/tests"/>
-					<pathelement location="${build.dir}/main"/>
+					<pathelement location="${build.dir}/class-tests"/>
+					<pathelement location="${build.dir}/class-mbo"/>
 					<pathelement location="${basedir}/properties"/>
 				</path>
 			</else>
@@ -374,7 +382,7 @@
 
 	<target name="package.jar.mbo" depends="compile.mbo" unless="${skip.package.jar.mbo}">
 		<antcall target="generic.package.jar">
-			<param name="local.src" value="${build.dir}/main"/>
+			<param name="local.src" value="${build.dir}/class-mbo"/>
 			<param name="local.dest" value="${ivy.distrib.dir}/jars/${package.name.mbo.jar}"/>
 			<param name="local.name" value="Business Objects"/>
 		</antcall>
@@ -385,7 +393,7 @@
 
 	<target name="package.jar.webclient" depends="compile.ui" unless="${skip.package.jar.webclient}">
 		<antcall target="generic.package.jar">
-			<param name="local.src" value="${build.dir}/mainui"/>
+			<param name="local.src" value="${build.dir}/class-ui"/>
 			<param name="local.dest" value="${ivy.distrib.dir}/jars/${package.name.ui.jar}"/>
 			<param name="local.name" value="User Interface"/>
 		</antcall>
@@ -393,7 +401,7 @@
 
 	<target name="package.jar.tools" depends="compile.tools" unless="${skip.package.jar.tools}">
 		<antcall target="generic.package.jar">
-			<param name="local.src" value="${build.dir}/tools"/>
+			<param name="local.src" value="${build.dir}/class-tools"/>
 			<param name="local.dest" value="${ivy.distrib.dir}/jars/${package.name.tools.jar}"/>
 			<param name="local.name" value="Tools"/>
 		</antcall>
@@ -439,7 +447,7 @@
 	</target>
 
 		
-	<target name="package.zip" depends="compile.appxml,package.jar.mbo,package.jar.webclient,compile.tools,compile.applications" unless="${skip.package.zip}">
+	<target name="package.zip" depends="compile.appxml,package.jar.mbo,package.jar.webclient,package.jar.tools,copy.tools,copy.applications" unless="${skip.package.zip}">
 		<zip destfile="${ivy.distrib.dir}/zips/${package.name.zip}">
 			<!-- this will copy the jar files into the package. -->
 			<zipfileset dir="${ivy.distrib.dir}/jars" includes="${package.name.mbo.jar}" fullpath="applications/maximo/lib/${package.name.mbo.jar.deploy}"/>
@@ -464,10 +472,10 @@
 			</then>
 		</if>
 		<if>
-			<available file="${lib.dir}/tools" type="dir"/>
+			<available file="${lib.dir}/runtools" type="dir"/>
 			<then>
 				<zip destfile="${ivy.distrib.dir}/zips/${package.name.zip}" update="true">
-					<zipfileset dir="${lib.dir}/tools" includes="*" prefix="tools/maximo/lib/"/>
+					<zipfileset dir="${lib.dir}/runtools" includes="*" prefix="tools/maximo/lib/"/>
 				</zip>
 			</then>
 		</if>
@@ -544,56 +552,63 @@
 	<target name="compile.mbo" depends="init,ivy.resolve">
 		<antcall target="generic.compile">
 			<param name="local.src" value="${src.mbo.dir}"/>
-			<param name="local.dest" value="${build.dir}/main"/>
+			<param name="local.dest" value="${build.dir}/class-mbo"/>
 			<param name="local.classpath" value="lib.build.classpath"/>
 		</antcall>
 		<antcall target="generic.copy">
 			<param name="local.src" value="${src.mbo.dir}"/>
-			<param name="local.dest" value="${build.dir}/main"/>
+			<param name="local.dest" value="${build.dir}/class-mbo"/>
 		</antcall>
 	</target>
 
 	<target name="compile.ui" depends="init,ivy.resolve">
 		<antcall target="generic.compile">
 			<param name="local.src" value="${src.ui.dir}"/>
-			<param name="local.dest" value="${build.dir}/mainui"/>
+			<param name="local.dest" value="${build.dir}/class-ui"/>
 			<param name="local.classpath" value="lib.build.classpath"/>
 		</antcall>
 		<antcall target="generic.copy">
 			<param name="local.src" value="${src.ui.dir}"/>
-			<param name="local.dest" value="${build.dir}/mainui"/>
+			<param name="local.dest" value="${build.dir}/class-ui"/>
 		</antcall>
 	</target>
 
 	<target name="compile.tools" depends="init,ivy.resolve">
 		<antcall target="generic.compile">
 			<param name="local.src" value="${src.tools.dir}"/>
-			<param name="local.dest" value="${build.dir}/tools"/>
-			<param name="local.classpath" value="lib.build.classpath"/>
+			<param name="local.dest" value="${build.dir}/class-tools"/>
+			<param name="local.classpath" value="lib.tools.classpath"/>
 		</antcall>
 		<antcall target="generic.copy">
 			<param name="local.src" value="${src.tools.dir}"/>
-			<param name="local.dest" value="${build.dir}/tools"/>
+			<param name="local.dest" value="${build.dir}/class-tools"/>
 		</antcall>
 	</target>
 
 	<target name="compile.test" depends="compile.mbo">
-		<javac srcdir="${src.test.dir}" destdir="${build.dir}/tests" debug="true" includeantruntime="false">
+		<javac srcdir="${src.test.dir}" destdir="${build.dir}/class-tests" debug="true" includeantruntime="false">
 			<classpath>
 				<path refid="lib.test.classpath"/>
-				<pathelement location="${build.dir}/main"/>
+				<pathelement location="${build.dir}/class-mbo"/>
 			</classpath>
 		</javac>
 		<antcall target="generic.copy">
 			<param name="local.src" value="${src.test.dir}"/>
-			<param name="local.dest" value="${build.dir}/tests"/>
+			<param name="local.dest" value="${build.dir}/class-tests"/>
 		</antcall>
 	</target>
 
-	<target name="compile.applications" depends="init,ivy.resolve">
+	<target name="copy.applications" depends="init,ivy.resolve">
 		<antcall target="generic.copy">
 			<param name="local.src" value="${basedir}/applications"/>
 			<param name="local.dest" value="${build.dir}/applications"/>
+		</antcall>
+	</target>
+
+	<target name="copy.tools" depends="init,ivy.resolve">
+		<antcall target="generic.copy">
+			<param name="local.src" value="${basedir}/tools"/>
+			<param name="local.dest" value="${build.dir}/tools"/>
 		</antcall>
 	</target>
 
@@ -624,7 +639,7 @@
 		<delete dir="${lib.dir}/test"/>
 		<delete dir="${lib.dir}/run"/>
 		<delete dir="${lib.dir}/runui"/>
-		<delete dir="${lib.dir}/tools"/>
+		<delete dir="${lib.dir}/runtools"/>
 		<delete dir="${lib.dir}/javadoc"/>
 		<delete dir="${lib.dir}/reference"/>
 		<delete dir="${lib.dir}/source"/>
