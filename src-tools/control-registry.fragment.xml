@@ -1,0 +1,60 @@
+	<control-descriptor name="isiframeportlet" descriptor-class="psdi.webclient.system.runtime.DatasrcDescriptor" instance-class="com.interlocsolutions.maximo.webclient.iframe.IFramePortlet">
+		<property-list>
+			<property name="datasrc">
+				<flag name="nonconditional" />
+				<flag name="global" />
+			</property>
+			<property name="display" type="xsd:boolean">
+				<flag name="global" />
+				<default-value>true</default-value>
+			</property>
+			<property name="id">
+				<flag name="final" />
+			</property>
+			<property name="label" />
+			<property name="labelcss" />
+			<property name="layoutid">
+				<flag name="final" />
+				<flag name="system" />
+			</property>
+			<property name="minormax">
+				<default-value>1</default-value>
+			</property>
+			<property name="portletid">
+				<flag name="final" />
+				<flag name="system" />
+			</property>
+			<property name="readonlymode" type="xsd:boolean">
+				<default-value>false</default-value>
+			</property>
+			<property name="relationship">
+				<flag name="final" />
+				<flag name="system" />
+				<default-value>FACONFIG</default-value>
+			</property>
+			<property name="textcss">
+				<flag name="global" />
+				<flag name="final" />
+				<default-value>text</default-value>
+			</property>
+		</property-list>
+		<component-list>
+			<components id="co" layout="vertical">
+				<headerbar id="hb" cssclass="ps" rightendclass="phbr">
+					<label id="lb" labelcss="@{labelcss}" title="@{label}" align="left" cssclass="pt" useheading="true" textcss="@{textcss}" accepthtmltags="false" />
+					<blankline id="bl" cssclass="ts" />
+					<image id="img" src="btn_editportlet.gif" clickable="true" mxevent="editportlet" targetid="@{id}" msgkey="editportletlbl" msggroup="startcntr" hidewhen="@{readonlymode}==true or {mobile}==true" ariahidden="true"/>
+					<toggleimage id="ti" srctrue="btn_minimizeportlet.gif" srcfalse="btn_maximizeportlet.gif" statecheck="isMaximised" msgfalse="jspmessages#maxportletlbl" msgtrue="jspmessages#minportletlbl" mxevent="toggleportlet" falseactive="true" align="right" hidewhen="{mobile}==true" ariahidden="true"/>
+					<image id="img2" src="btn_removeportlet.gif" clickable="true" mxevent="deleteportlet" msgkey="delportletlbl" msggroup="startcntr" targetid="@{id}" hidewhen="@{readonlymode}==true or {mobile}==true" ariahidden="true"/>
+				</headerbar>
+			</components>
+			<components id="co2" layout="vertical">
+				<components id="co3" layout="horizontal">
+					<isiframeportlet id="content" portletid="@{portletid}" layoutid="@{layoutid}" minormax="@{minormax}" textcss="@{textcss}"/>
+				</components>
+			</components>
+		</component-list>
+		<containers>
+			<container name="startcenter-pane" />
+		</containers>
+	</control-descriptor>

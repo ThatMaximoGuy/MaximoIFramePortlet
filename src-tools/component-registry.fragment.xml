@@ -1,0 +1,21 @@
+	<component-descriptor name="isiframeportlet">
+		<property-list>
+			<property name="jsp-filename">
+				<default-value>isiframeportlet</default-value>
+			</property>
+			<property name="id">
+				<flag name="final" />
+			</property>
+			<property name="layoutid">
+				<flag name="final" />
+			</property>
+			<property name="minormax" />
+			<property name="portletid">
+				<flag name="final" />
+			</property>
+			<property name="visible">
+				<default-value>true</default-value>
+			</property>
+			<property name="textcss" />
+		</property-list>
+	</component-descriptor>

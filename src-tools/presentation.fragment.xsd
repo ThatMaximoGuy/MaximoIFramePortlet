@@ -1,0 +1,16 @@
+
+    <xsd:element name="isiframeportlet" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+        <xsd:complexType>
+            <xsd:attribute name="datasrc" type="xsd:string"/>
+            <xsd:attribute default="true" name="display" type="xsd:boolean"/>
+            <xsd:attribute name="id" type="xsd:string" use="required"/>
+            <xsd:attribute name="label" type="xsd:string"/>
+            <xsd:attribute name="labelcss" type="xsd:string"/>
+            <xsd:attribute name="layoutid" type="xsd:string"/>
+            <xsd:attribute default="1" name="minormax" type="xsd:string"/>
+            <xsd:attribute name="portletid" type="xsd:string"/>
+            <xsd:attribute default="false" name="readonlymode" type="xsd:boolean"/>
+            <xsd:attribute default="FACONFIG" name="relationship" type="xsd:string"/>
+            <xsd:attribute default="text" name="textcss" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>

@@ -1,0 +1,14 @@
+    <xsd:element name="isiframeportlet" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+        <xsd:complexType>
+            <xsd:choice>
+                <xsd:any maxOccurs="unbounded" minOccurs="0" processContents="lax"/>
+            </xsd:choice>
+            <xsd:attribute default="isiframeportlet" name="jsp-filename" type="xsd:string"/>
+            <xsd:attribute name="id" type="xsd:string" use="required"/>
+            <xsd:attribute name="layoutid" type="xsd:string"/>
+            <xsd:attribute name="minormax" type="xsd:string"/>
+            <xsd:attribute name="portletid" type="xsd:string"/>
+            <xsd:attribute default="true" name="visible" type="xsd:string"/>
+            <xsd:attribute name="textcss" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
