@@ -47,12 +47,6 @@
 		</fileset>
 	</path>
 
-	<path id="lib.tools.classpath">
-		<fileset dir="lib">
-			<include name="runtools/*.jar"/>
-			<include name="build/*.jar"/>
-		</fileset>
-	</path>
 
 	<path id="lib.test.classpath">
 		<fileset dir="lib">
@@ -577,7 +571,7 @@
 		<antcall target="generic.compile">
 			<param name="local.src" value="${src.tools.dir}"/>
 			<param name="local.dest" value="${build.dir}/class-tools"/>
-			<param name="local.classpath" value="lib.tools.classpath"/>
+			<param name="local.classpath" value="lib.build.classpath"/>
 		</antcall>
 		<antcall target="generic.copy">
 			<param name="local.src" value="${src.tools.dir}"/>

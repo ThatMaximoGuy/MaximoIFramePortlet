@@ -31,5 +31,6 @@
 	<classpathentry kind="lib" path="lib/run/MaximoPortlet.jar"/>
 	<classpathentry kind="lib" path="lib/runtools/jsap.jar"/>
 	<classpathentry kind="lib" path="lib/runtools/jaxen.jar"/>
+	<classpathentry kind="lib" path="lib/runtools/MaximoPortlet-tools.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

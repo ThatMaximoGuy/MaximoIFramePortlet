@@ -11,7 +11,7 @@
         <conf name="javadoc" visibility="public" description="javadoc for project" />
 		<conf name="source" visibility="public" description="source for this project" />
         <conf name="reference" visibility="private" description="javadoc for this project that should not get republished" />
-       	<conf name="build" extends="run,runui" visibility="private" description="jars needed to build" />       	
+       	<conf name="build" extends="run,runui,runtools" visibility="private" description="jars needed to build" />       	
      	<conf name="test"  extends="run" visibility="private" description="jars needed to run tests"/>
      	<conf name="ant"   visibility="private" description="jars needed for ant and ant tasks"/>
     </configurations>
@@ -25,11 +25,10 @@
     
     <dependencies>
         <!-- Run dependencies -->
-        <dependency org="com.interlocsolutions.maximo" name="MaximoPortlet" rev="1.0.0" conf="run->run;reference->source,javadoc" />
+        <dependency org="com.interlocsolutions.maximo" name="MaximoPortlet" rev="1.0.0" conf="run->run;runtools->runtools;reference->source,javadoc" />
         
         <!-- run tools dependencies -->
         <dependency org="com.martiansoftware" name="jsap" rev="2.1" conf="runtools->default"  />
-        <dependency org="jaxen" name="jaxen" rev="1.1.6" conf="runtools->default" />
         
         
         <!-- Dependencies for compiling Maximo extensions. -->

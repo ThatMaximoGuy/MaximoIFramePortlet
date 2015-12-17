@@ -7,5 +7,5 @@
 pathToScript=`dirname %0`
 . $pathToScript/commonenv.sh
 
-../java/jre/bin/java -classpath .:./classes:$MAXIMO_CLASSPATH:./lib/jsap.jar:./lib/jaxen.jar  com.interlocsolutions.maximo.tools.InstallerEnvSetup "$*"
+../java/jre/bin/java -classpath .:./classes:$MAXIMO_CLASSPATH:./lib/jsap.jar:./lib/jaxen.jar:./lib/MaximoPortlet-tools.jar  com.interlocsolutions.maximo.tools.InstallerEnvSetup "$*"
 internal/runscriptfile.sh -cisiframe -fiframe_001

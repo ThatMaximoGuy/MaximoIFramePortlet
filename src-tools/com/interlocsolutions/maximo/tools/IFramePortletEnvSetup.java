@@ -1,22 +1,13 @@
 package com.interlocsolutions.maximo.tools;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Iterator;
-import java.util.List;
 
 import org.jaxen.JaxenException;
-import org.jaxen.jdom.JDOMXPath;
-import org.jdom.Content;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.Namespace;
-import org.jdom.input.SAXBuilder;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
@@ -31,6 +22,9 @@ import com.martiansoftware.jsap.Switch;
  *
  */
 public class IFramePortletEnvSetup {
+
+	/** splace xml into position. */
+	private XmlSplicer xmlSplicer = new XmlSplicer();
 
 	/**
 	 * Main method, executed from command line.
@@ -111,13 +105,13 @@ public class IFramePortletEnvSetup {
 		}
 		System.out.println("Processing " + componentRegistryFileName);
 
-		Document componentRegistry = loadXmlFile(componentRegistryFileName);
-		Document componentRegistryFragment = loadXmlFile(fragmentFile);
+		Document componentRegistry = xmlSplicer.loadXmlFile(componentRegistryFileName);
+		Document componentRegistryFragment = xmlSplicer.loadXmlFile(fragmentFile);
 
-		splice(componentRegistry, (Element) componentRegistryFragment.getRootElement().detach(), "/component-registry",
+		xmlSplicer.splice(componentRegistry, (Element) componentRegistryFragment.getRootElement().detach(), "/component-registry",
 				"//component-descriptor[@name=\"isiframeportlet\"]");
 
-		saveXmlFile(componentRegistry, componentRegistryFileName);
+		xmlSplicer.saveXmlFile(componentRegistry, componentRegistryFileName);
 	}
 
 
@@ -143,18 +137,18 @@ public class IFramePortletEnvSetup {
 		}
 		System.out.println("Processing " + componentsFileName);
 
-		Document components = loadXmlFile(componentsFileName);
-		Document componentsFragment = loadXmlFile(fragmentFile);
+		Document components = xmlSplicer.loadXmlFile(componentsFileName);
+		Document componentsFragment = xmlSplicer.loadXmlFile(fragmentFile);
 		Element fragment = (Element) componentsFragment.getRootElement().detach();
-		splice(components, fragment, "/xsd:schema", "//xsd:element[@name=\"isiframeportlet\"]");
+		xmlSplicer.splice(components, fragment, "/xsd:schema", "//xsd:element[@name=\"isiframeportlet\"]");
 
 		Namespace xsd = Namespace.getNamespace("xsd", components.getRootElement().getNamespaceURI());
 		Element element = new Element("element", xsd);
 		element.setAttribute("ref", fragment.getAttributeValue("name"));
 
-		splice(components, element, "//xsd:complexType[@name=\"componentListType\"]/xsd:choice",
+		xmlSplicer.splice(components, element, "//xsd:complexType[@name=\"componentListType\"]/xsd:choice",
 				"//xsd:complexType[@name=\"componentListType\"]/xsd:choice/xsd:element[@ref=\"isiframeportlet\"]");
-		saveXmlFile(components, componentsFileName);
+		xmlSplicer.saveXmlFile(components, componentsFileName);
 	}
 
 
@@ -181,12 +175,12 @@ public class IFramePortletEnvSetup {
 		}
 		System.out.println("Processing " + controlRegistryFileName);
 
-		Document controlRegistry = loadXmlFile(controlRegistryFileName);
-		Document controlRegistryFragment = loadXmlFile(fragmentFile);
-		splice(controlRegistry, (Element) controlRegistryFragment.getRootElement().detach(), "/control-registry",
+		Document controlRegistry = xmlSplicer.loadXmlFile(controlRegistryFileName);
+		Document controlRegistryFragment = xmlSplicer.loadXmlFile(fragmentFile);
+		xmlSplicer.splice(controlRegistry, (Element) controlRegistryFragment.getRootElement().detach(), "/control-registry",
 				"//control-descriptor[@name=\"isiframeportlet\"]");
 
-		saveXmlFile(controlRegistry, controlRegistryFileName);
+		xmlSplicer.saveXmlFile(controlRegistry, controlRegistryFileName);
 	}
 
 
@@ -212,110 +206,19 @@ public class IFramePortletEnvSetup {
 		}
 		System.out.println("Processing " + presentationFileName);
 
-		Document presentation = loadXmlFile(presentationFileName);
-		Document presentationFragment = loadXmlFile(fragmentFile);
+		Document presentation = xmlSplicer.loadXmlFile(presentationFileName);
+		Document presentationFragment = xmlSplicer.loadXmlFile(fragmentFile);
 		Element fragment = (Element) presentationFragment.getRootElement().detach();
 
-		splice(presentation, fragment, "/xsd:schema", "//xsd:element[@name=\"isiframeportlet\"]");
+		xmlSplicer.splice(presentation, fragment, "/xsd:schema", "//xsd:element[@name=\"isiframeportlet\"]");
 
 		Namespace xsd = Namespace.getNamespace("xsd", presentation.getRootElement().getNamespaceURI());
 		Element element = new Element("element", xsd);
 		element.setAttribute("ref", fragment.getAttributeValue("name"));
-		splice(presentation, element, "//xsd:element[@name=\"startcenter-pane\"]/xsd:complexType/xsd:choice",
+		xmlSplicer.splice(presentation, element, "//xsd:element[@name=\"startcenter-pane\"]/xsd:complexType/xsd:choice",
 				"//xsd:element[@name=\"startcenter-pane\"]/xsd:complexType/xsd:choice/xsd:element[@ref=\"isiframeportlet\"]");
 
-		saveXmlFile(presentation, presentationFileName);
-	}
-
-
-	/**
-	 * Load an xml file from the file with the given name.
-	 *
-	 * @param filename the name of the file to load.
-	 * @return a Document representing the xml file.
-	 * @throws JDOMException if an XML problem occurs.
-	 * @throws IOException if an IO problem occurs.
-	 */
-	private Document loadXmlFile(String filename) throws JDOMException, IOException {
-		return loadXmlFile(new FileInputStream(filename));
-	}
-
-
-	/**
-	 * Load an xml file from an input stream.
-	 *
-	 * @param istream the stream from which to load the xml file.
-	 * @return a Document representing the xml file.
-	 * @throws JDOMException if an XML problem occurs.
-	 * @throws IOException if an IO problem occurs.
-	 */
-	private Document loadXmlFile(InputStream istream) throws JDOMException, IOException {
-		SAXBuilder builder = new SAXBuilder();
-		Document doc = builder.build(istream);
-		return doc;
-	}
-
-
-	/**
-	 * Save the given xml document to the named file.
-	 *
-	 * @param document the xml document to save.
-	 * @param filename the file to save to.
-	 * @throws IOException if an IO problem occurs.
-	 */
-	private void saveXmlFile(Document document, String filename) throws IOException {
-		Format format = Format.getPrettyFormat();
-		format.setLineSeparator("\n");
-		XMLOutputter out = new XMLOutputter(format);
-		out.output(document, new FileOutputStream(filename));
-	}
-
-
-	/**
-	 * Find content matching the given XPath search string.
-	 *
-	 * @param document the document to search
-	 * @param search the XPath search expression.
-	 * @return a list of Content that matches the expression.
-	 * @throws JaxenException if an XPath problem occurs.
-	 */
-	@SuppressWarnings("rawtypes")
-	private List findXPath(Document document, String search) throws JaxenException {
-		JDOMXPath xpath = new JDOMXPath(search);
-		xpath.addNamespace("xsd", document.getRootElement().getNamespaceURI());
-
-		List nodes = xpath.selectNodes(document);
-		return nodes;
-	}
-
-
-	/**
-	 * Splace a fragment into the document at the insertion point. Remove any
-	 * duplicates first.
-	 *
-	 * @param document the document to insert into.
-	 * @param fragment the xml fragment to insert.
-	 * @param insertion the parent node underwhich to insert the fragment.
-	 * @param check an expression for finding duplicates of fragment to be
-	 *        deleted.
-	 * @throws JaxenException if an XPath problem occurs.
-	 */
-	@SuppressWarnings("rawtypes")
-	private void splice(Document document, Element fragment, String insertion, String check) throws JaxenException {
-		List duplicates = findXPath(document, check);
-		Iterator i = duplicates.iterator();
-		while (i.hasNext()) {
-			System.out.println("   Removing duplicate node");
-			Content c = (Content) i.next();
-			c.detach();
-		}
-
-		List parent = findXPath(document, insertion);
-		if (parent.size() == 0) {
-			System.err.println("Unable to find insertion node: " + insertion);
-		}
-		Element e = (Element) parent.get(0);
-		e.addContent(0, fragment);
+		xmlSplicer.saveXmlFile(presentation, presentationFileName);
 	}
 
 }
