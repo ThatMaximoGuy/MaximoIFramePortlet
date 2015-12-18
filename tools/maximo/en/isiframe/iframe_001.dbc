@@ -7,7 +7,10 @@
     <modify_service servicename="SCCONFIG" classname="com.interlocsolutions.maximo.app.scconfig.ISStartCenterService"/>
 
     <!-- create application for portlet. -->
-    <create_app app="ISIFRAME" description="Interloc IFrame Portlet" maintbname="ISIFRAMECFG" originalapp="CUSTAPP" />
+    <create_app app="ISIFRAME" description="Interloc IFrame Portlet" maintbname="ISIFRAMECFG" />
+    <freeform description="Portlet Definition">
+        <sql target="all">update maxapps set originalapp='CUSTAPP' where app='ISIFRAME';</sql>
+    </freeform>
     <add_sigoption visible="true" app="ISIFRAME" optionname="READ" description="Read/Modify access to IFrame Application Setup" alsorevokes="ALL" esigenabled="false" langcode="EN" />
     <add_sigoption visible="true" app="ISIFRAME" optionname="NOPORTLET" description="Hide Portlet" esigenabled="false" langcode="EN" />
 
