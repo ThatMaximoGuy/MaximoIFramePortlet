@@ -50,6 +50,7 @@ public class ISIFrameService extends AppService implements CustomPortletHandler 
 		MboSetRemote msr = arg2.getMboSet("ISIFRAMECFG");
 		MboRemote mr = msr.add();
 		mr.setValue("URL", iframeXml.getAttributeValue("url"));
+		mr.setValue("SIZEX", iframeXml.getAttributeValue("sizex"));
 		mr.setValue("SIZEY", iframeXml.getAttributeValue("sizey"));
 	}
 
@@ -68,6 +69,7 @@ public class ISIFrameService extends AppService implements CustomPortletHandler 
 			MboRemote mr = msr.getMbo(0);
 			Element iframeXml = new Element(xmlNodeName());
 			iframeXml.setAttribute("url", mr.getString("URL"));
+			iframeXml.setAttribute("sizex", mr.getString("SIZEX"));
 			iframeXml.setAttribute("sizey", mr.getString("SIZEY"));
 			arg0.addContent(iframeXml);
 		} finally {

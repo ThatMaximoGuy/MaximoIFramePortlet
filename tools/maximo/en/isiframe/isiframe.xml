@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<presentation beanclass="com.interlocsolutions.maximo.webclient.iframe.IFramePortletBean" id="isiframe" mboname="LAYOUT" trackrecent="false" version="7.1.0.0">
+	<page id="isiframePage">
+		<include id="selfServicePageHeader"/>
+		<clientarea id="clientarea">
+			<tabgroup format="carddeck" id="maintabs" style="form">
+				<tab id="main" type="insert">
+					<section border="true" id="mainSection">
+						<sectionrow id="mainSection_row1">
+							<sectioncol id="mainSection_col1">
+								<section id="mainSection_sec1">
+									<textbox dataattribute="portlet.description" id="mainSection_1" inputmode="readonly"/>
+								</section>
+							</sectioncol>
+							<sectioncol id="mainSection_col2">
+								<section id="mainSection_sec2">
+									<textbox dataattribute="description" id="mainSection_2"/>
+								</section>
+							</sectioncol>
+						</sectionrow>
+					</section>
+               <section border="true" id="isiframeconfig">
+                  <textbox dataattribute="isiframecfg.url" id="isiframeconfig_1"/>
+                  <textbox dataattribute="isiframecfg.sizex" id="isiframeconfig_2"/>
+                  <textbox dataattribute="isiframecfg.sizey" id="isiframeconfig_3"/>
+               </section>
+		<buttongroup id="tableButtonGroup">
+			<pushbutton id="tableButtonGroup_1" label="Finished" mxevent="gotostartcenter" targetid="isiframe"/>
+			<pushbutton id="tableButtonGroup_2" label="Cancel" mxevent="cancel" targetid="isiframe"/>
+		</buttongroup>
+				</tab>
+			</tabgroup>
+		</clientarea>
+		<include id="pageFooter"/>
+	</page>
+</presentation>

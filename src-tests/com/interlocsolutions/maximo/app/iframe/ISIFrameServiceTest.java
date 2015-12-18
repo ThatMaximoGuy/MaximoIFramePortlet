@@ -87,7 +87,9 @@ public class ISIFrameServiceTest extends MaximoTestHarness {
 		Element parent = new Element("layout");
 		Element isiframeXml = new Element(service.xmlNodeName());
 		isiframeXml.setAttribute("url", "JUNITURL");
+		isiframeXml.setAttribute("sizex", "6");
 		isiframeXml.setAttribute("sizey", "5");
+
 		parent.addContent(isiframeXml);
 
 		UserInfo ui = MXServer.getMXServer().getSystemUserInfo();
@@ -109,6 +111,7 @@ public class ISIFrameServiceTest extends MaximoTestHarness {
 
 		MboRemote mr = msr.getMbo(0);
 		assertEquals("JUNITURL", mr.getString("URL"));
+		assertEquals(6, mr.getInt("sizex"));
 		assertEquals(5, mr.getInt("sizey"));
 	}
 
@@ -131,6 +134,7 @@ public class ISIFrameServiceTest extends MaximoTestHarness {
 		MboSetRemote msr = layout.getMboSet("ISIFRAMECFG");
 		MboRemote mr = msr.add();
 		mr.setValue("URL", "JUNIT");
+		mr.setValue("SIZEX", 11);
 		mr.setValue("SIZEY", 10);
 
 		UserInfo ui = MXServer.getMXServer().getSystemUserInfo();
@@ -149,6 +153,7 @@ public class ISIFrameServiceTest extends MaximoTestHarness {
 		Element child = children.get(0);
 		assertEquals(service.xmlNodeName(), child.getName());
 		assertEquals("JUNIT", child.getAttributeValue("url"));
+		assertEquals("11", child.getAttributeValue("sizex"));
 		assertEquals("10", child.getAttributeValue("sizey"));
 	}
 }

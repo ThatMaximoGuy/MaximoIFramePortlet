@@ -35,6 +35,20 @@ public class IFramePortlet extends PortletDataInstance {
 		return 200;
 	}
 
+	/**
+	 * @return return the vertical size of the iframe.
+	 */
+	public int getSizeX() {
+		try {
+			return getDataBean().getMbo().getInt("SIZEX");
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		} catch (MXException e) {
+			e.printStackTrace();
+		}
+		return 200;
+	}
+
 
 	/**
 	 * @return return the url to display.
