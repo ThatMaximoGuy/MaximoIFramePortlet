@@ -30,7 +30,7 @@
 			<property name="relationship">
 				<flag name="final" />
 				<flag name="system" />
-				<default-value>FACONFIG</default-value>
+				<default-value>ISIFRAMECFG</default-value>
 			</property>
 			<property name="textcss">
 				<flag name="global" />

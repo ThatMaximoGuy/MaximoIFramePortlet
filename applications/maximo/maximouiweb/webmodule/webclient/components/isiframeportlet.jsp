@@ -1,3 +1,4 @@
+<%@page import="com.interlocsolutions.maximo.webclient.iframe.IFramePortlet" %>
 <%@ include file="../common/simpleheader.jsp"%>
 <%
 String layoutId =  component.getProperty("layoutid");
@@ -20,7 +21,7 @@ if(portletStateManager.isPortletNotLoaded(component)) {
 		if(portletStateManager.wasPortletLoadCalled())
 		{	
 			holderId="portletbody_"+layoutId;	
-%>
+%><component vis="true" ignrdispstyle="true" id="<%=id%>_holder" holder="<%=holderId%>" comptype="<%=component.getType()%>"><%="<![CDATA["%>
 <iframe src="<%= portletControl.getUrl() %>" height="<%= portletControl.getSizeY() %>">iframe unsupported</iframe>
 <!--  portlet content here -->
 <script>finishPortlet("<%=layoutId%>");</script><%="]]>"%></component>
