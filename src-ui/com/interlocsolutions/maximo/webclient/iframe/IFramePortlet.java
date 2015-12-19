@@ -2,6 +2,7 @@ package com.interlocsolutions.maximo.webclient.iframe;
 
 import java.rmi.RemoteException;
 
+import psdi.mbo.MboRemote;
 import psdi.util.MXException;
 import psdi.webclient.controls.PortletDataInstance;
 
@@ -26,7 +27,10 @@ public class IFramePortlet extends PortletDataInstance {
 	 */
 	public int getSizeY() {
 		try {
-			return getDataBean().getMbo().getInt("SIZEY");
+			MboRemote mr = getDataBean().getMbo();
+			if ((mr != null) && !mr.isNull("SIZEY")) {
+				return getDataBean().getMbo().getInt("SIZEY");
+			}
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		} catch (MXException e) {
@@ -35,12 +39,16 @@ public class IFramePortlet extends PortletDataInstance {
 		return 200;
 	}
 
+
 	/**
 	 * @return return the vertical size of the iframe.
 	 */
 	public int getSizeX() {
 		try {
-			return getDataBean().getMbo().getInt("SIZEX");
+			MboRemote mr = getDataBean().getMbo();
+			if ((mr != null) && !mr.isNull("SIZEX")) {
+				return getDataBean().getMbo().getInt("SIZEX");
+			}
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		} catch (MXException e) {
@@ -55,7 +63,10 @@ public class IFramePortlet extends PortletDataInstance {
 	 */
 	public String getUrl() {
 		try {
-			return getDataBean().getMbo().getString("URL");
+			MboRemote mr = getDataBean().getMbo();
+			if ((mr != null) && !mr.isNull("URL")) {
+				return getDataBean().getMbo().getString("URL");
+			}
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		} catch (MXException e) {
