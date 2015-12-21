@@ -22,8 +22,11 @@ if(portletStateManager.isPortletNotLoaded(component)) {
 		{	
 			holderId="portletbody_"+layoutId;	
 %><component vis="true" ignrdispstyle="true" id="<%=id%>_holder" holder="<%=holderId%>" comptype="<%=component.getType()%>"><%="<![CDATA["%>
+<% if ("".equals(portletControl.getUrl())) { %>
+<%@ include file="portletnotsetupmsg.jsp" %>
+<% } else { %>
 <iframe src="<%= portletControl.getUrl() %>" height="<%= portletControl.getSizeY() %>" width="<%= portletControl.getSizeX() %>">iframe unsupported</iframe>
-<!--  portlet content here -->
+<% } %>
 <script>finishPortlet("<%=layoutId%>");</script><%="]]>"%></component>
 <%			portletStateManager.setStateLoaded();
 		} else {
