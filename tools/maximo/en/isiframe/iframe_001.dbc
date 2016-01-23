@@ -13,6 +13,8 @@
     </freeform>
     <add_sigoption visible="true" app="ISIFRAME" optionname="READ" description="Read/Modify access to IFrame Application Setup" alsorevokes="ALL" esigenabled="false" langcode="EN" />
     <add_sigoption visible="true" app="ISIFRAME" optionname="NOPORTLET" description="Hide Portlet" esigenabled="false" langcode="EN" />
+    <add_sigoption visible="true" app="ISIFRAME" optionname="MODIFYURL" description="Modify URL" esigenabled="false" langcode="EN" />
+    
 
     <!-- create service for portlet.  The portlet must implement CustomPortletHandler. -->
     <add_service servicename="ISIFRAME" description="Interloc IFrame Portlet" classname="com.interlocsolutions.maximo.app.iframe.ISIFrameService" />

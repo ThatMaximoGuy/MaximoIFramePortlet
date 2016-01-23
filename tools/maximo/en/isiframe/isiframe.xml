@@ -20,7 +20,7 @@
 						</sectionrow>
 					</section>
                <section border="true" id="isiframeconfig">
-                  <textbox dataattribute="isiframecfg.url" id="isiframeconfig_1"/>
+                  <textbox dataattribute="isiframecfg.url" id="isiframeconfig_1" sigoption="MODIFYURL"/>
                   <textbox dataattribute="isiframecfg.sizex" id="isiframeconfig_2"/>
                   <textbox dataattribute="isiframecfg.sizey" id="isiframeconfig_3"/>
                </section>
