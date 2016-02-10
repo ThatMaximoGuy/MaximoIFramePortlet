@@ -25,7 +25,7 @@
     
     <dependencies>
         <!-- Run dependencies -->
-        <dependency org="com.interlocsolutions.maximo" name="MaximoPortlet" rev="1.0.0" conf="run->run;runtools->runtools;reference->source,javadoc" />
+        <dependency org="com.interlocsolutions.maximo" name="MaximoPortlet" rev="1.0.1" conf="run->run;runtools->runtools;reference->source,javadoc" />
         
         <!-- run tools dependencies -->
         <dependency org="com.martiansoftware" name="jsap" rev="2.1" conf="runtools->default"  />
